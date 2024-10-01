@@ -7,6 +7,9 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"go.uber.org/zap"
+
+	"github.com/stanislavCasciuc/atom-fit/api/handlers"
+	"github.com/stanislavCasciuc/atom-fit/api/response"
 )
 
 type Config struct {
@@ -41,6 +44,8 @@ func (a *Application) Run(mux http.Handler) error {
 }
 
 func (a *Application) Mount() http.Handler {
+	resp := response.New(a.Log)
+	h := handlers.New(resp)
 	r := chi.NewRouter()
 	r.Use(middleware.RequestID)
 	r.Use(middleware.RealIP)
@@ -54,7 +59,7 @@ func (a *Application) Mount() http.Handler {
 
 	r.Route("/api", func(r chi.Router) {
 		r.Route("/v1", func(r chi.Router) {
-			r.Get("/health", a.healthHandler)
+			r.Get("/health", h.HealthHandler)
 		})
 	})
 	return r
