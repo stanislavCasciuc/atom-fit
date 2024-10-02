@@ -1,6 +1,7 @@
 package api
 
 import (
+	"database/sql"
 	"net/http"
 	"time"
 
@@ -27,6 +28,7 @@ type DbConfig struct {
 type Application struct {
 	Config Config
 	Log    *zap.SugaredLogger
+	DB     *sql.DB
 }
 
 func (a *Application) Run(mux http.Handler) error {
@@ -45,7 +47,7 @@ func (a *Application) Run(mux http.Handler) error {
 
 func (a *Application) Mount() http.Handler {
 	resp := response.New(a.Log)
-	h := handlers.New(resp)
+	h := handlers.New(resp, a.DB)
 	r := chi.NewRouter()
 	r.Use(middleware.RequestID)
 	r.Use(middleware.RealIP)

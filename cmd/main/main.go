@@ -1,9 +1,12 @@
 package main
 
 import (
+	_ "github.com/joho/godotenv/autoload"
+	_ "github.com/lib/pq"
 	"go.uber.org/zap"
 
 	"github.com/stanislavCasciuc/atom-fit/api"
+	"github.com/stanislavCasciuc/atom-fit/db"
 	"github.com/stanislavCasciuc/atom-fit/internal/env"
 )
 
@@ -25,9 +28,21 @@ func main() {
 	logger := zap.Must(zap.NewProduction()).Sugar()
 	defer logger.Sync()
 
+	db, err := db.New(
+		config.DB.Addr,
+		config.DB.MaxOpenConns,
+		config.DB.MaxIdleConns,
+		config.DB.MaxIdleTime,
+	)
+	if err != nil {
+		logger.Fatal(err)
+	}
+	logger.Info("db connected successfully")
+
 	app := &api.Application{
 		Config: config,
 		Log:    logger,
+		DB:     db,
 	}
 
 	mux := app.Mount()
