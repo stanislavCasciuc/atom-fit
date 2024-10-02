@@ -1,0 +1,2 @@
+ALTER TABLE invitation
+DROP COLUMN	IF EXISTS exp;
