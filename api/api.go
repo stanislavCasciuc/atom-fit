@@ -1,7 +1,6 @@
 package api
 
 import (
-	"database/sql"
 	"net/http"
 	"time"
 
@@ -11,6 +10,7 @@ import (
 
 	"github.com/stanislavCasciuc/atom-fit/api/handlers"
 	"github.com/stanislavCasciuc/atom-fit/api/response"
+	"github.com/stanislavCasciuc/atom-fit/internal/store"
 )
 
 type Config struct {
@@ -28,7 +28,7 @@ type DbConfig struct {
 type Application struct {
 	Config Config
 	Log    *zap.SugaredLogger
-	DB     *sql.DB
+	Store  store.Storage
 }
 
 func (a *Application) Run(mux http.Handler) error {
@@ -47,7 +47,7 @@ func (a *Application) Run(mux http.Handler) error {
 
 func (a *Application) Mount() http.Handler {
 	resp := response.New(a.Log)
-	h := handlers.New(resp, a.DB)
+	h := handlers.New(resp, a.Store)
 	r := chi.NewRouter()
 	r.Use(middleware.RequestID)
 	r.Use(middleware.RealIP)
@@ -62,6 +62,9 @@ func (a *Application) Mount() http.Handler {
 	r.Route("/api", func(r chi.Router) {
 		r.Route("/v1", func(r chi.Router) {
 			r.Get("/health", h.HealthHandler)
+			r.Route("/users", func(r chi.Router) {
+				r.Post("/register", h.RegisterUserHandler)
+			})
 		})
 	})
 	return r

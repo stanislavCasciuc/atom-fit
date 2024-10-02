@@ -8,6 +8,7 @@ import (
 	"github.com/stanislavCasciuc/atom-fit/api"
 	"github.com/stanislavCasciuc/atom-fit/db"
 	"github.com/stanislavCasciuc/atom-fit/internal/env"
+	"github.com/stanislavCasciuc/atom-fit/internal/store"
 )
 
 func main() {
@@ -39,10 +40,12 @@ func main() {
 	}
 	logger.Info("db connected successfully")
 
+	store := store.New(db)
+
 	app := &api.Application{
 		Config: config,
 		Log:    logger,
-		DB:     db,
+		Store:  store,
 	}
 
 	mux := app.Mount()
