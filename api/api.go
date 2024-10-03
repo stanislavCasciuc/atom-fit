@@ -10,23 +10,12 @@ import (
 
 	"github.com/stanislavCasciuc/atom-fit/api/handlers"
 	"github.com/stanislavCasciuc/atom-fit/api/response"
+	"github.com/stanislavCasciuc/atom-fit/internal/lib/config"
 	"github.com/stanislavCasciuc/atom-fit/internal/store"
 )
 
-type Config struct {
-	Addr string
-	DB   DbConfig
-	Env  string
-}
-
-type DbConfig struct {
-	Addr         string
-	MaxOpenConns int
-	MaxIdleConns int
-	MaxIdleTime  string
-}
 type Application struct {
-	Config Config
+	Config config.Config
 	Log    *zap.SugaredLogger
 	Store  store.Storage
 }
@@ -47,7 +36,7 @@ func (a *Application) Run(mux http.Handler) error {
 
 func (a *Application) Mount() http.Handler {
 	resp := response.New(a.Log)
-	h := handlers.New(resp, a.Store)
+	h := handlers.New(resp, a.Store, a.Config)
 	r := chi.NewRouter()
 	r.Use(middleware.RequestID)
 	r.Use(middleware.RealIP)
@@ -63,6 +52,7 @@ func (a *Application) Mount() http.Handler {
 		r.Route("/v1", func(r chi.Router) {
 			r.Get("/health", h.HealthHandler)
 			r.Route("/users", func(r chi.Router) {
+				r.Put("/activate", h.ActivateUser)
 				r.Post("/register", h.RegisterUserHandler)
 			})
 		})

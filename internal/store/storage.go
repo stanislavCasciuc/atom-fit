@@ -3,15 +3,20 @@ package store
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"time"
 )
 
-var QueryTimeDuration = time.Second * 5
+var (
+	QueryTimeDuration = time.Second * 5
+	ErrNotFound       = errors.New("entity not found")
+)
 
 type Storage struct {
 	Users interface {
 		Create(context.Context, *sql.Tx, *User) error
 		CreateAndInvite(context.Context, *User, string, time.Duration) error
+		Activate(context.Context, string) error
 	}
 }
 

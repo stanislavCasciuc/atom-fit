@@ -8,13 +8,14 @@ import (
 	"github.com/stanislavCasciuc/atom-fit/api"
 	"github.com/stanislavCasciuc/atom-fit/db"
 	"github.com/stanislavCasciuc/atom-fit/internal/env"
+	"github.com/stanislavCasciuc/atom-fit/internal/lib/config"
 	"github.com/stanislavCasciuc/atom-fit/internal/store"
 )
 
 func main() {
-	config := api.Config{
+	cfg := config.Config{
 		Addr: env.EnvString("ADDR", ":8080"),
-		DB: api.DbConfig{
+		DB: config.DbConfig{
 			Addr: env.EnvString(
 				"DB_ADDR",
 				"postgres://postgres:postgres@localhost:5432/atom-fit?sslmode=disable",
@@ -24,16 +25,22 @@ func main() {
 			MaxIdleTime:  env.EnvString("DB_MAX_IDLE_TIME", "15m"),
 		},
 		Env: env.EnvString("ENV", "dev"),
+		Mail: config.MailCfg{
+			Addr:     env.EnvString("EMAIL_ADDR", ""),
+			Host:     env.EnvString("EMAIL_HOST", ""),
+			Port:     env.IntEnv("EMAIL_PORT", 0),
+			Password: env.EnvString("EMAIL_PASS", ""),
+		},
 	}
 
 	logger := zap.Must(zap.NewProduction()).Sugar()
 	defer logger.Sync()
 
 	db, err := db.New(
-		config.DB.Addr,
-		config.DB.MaxOpenConns,
-		config.DB.MaxIdleConns,
-		config.DB.MaxIdleTime,
+		cfg.DB.Addr,
+		cfg.DB.MaxOpenConns,
+		cfg.DB.MaxIdleConns,
+		cfg.DB.MaxIdleTime,
 	)
 	if err != nil {
 		logger.Fatal(err)
@@ -43,7 +50,7 @@ func main() {
 	store := store.New(db)
 
 	app := &api.Application{
-		Config: config,
+		Config: cfg,
 		Log:    logger,
 		Store:  store,
 	}

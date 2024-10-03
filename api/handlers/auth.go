@@ -9,6 +9,7 @@ import (
 	"github.com/google/uuid"
 
 	"github.com/stanislavCasciuc/atom-fit/api/response"
+	"github.com/stanislavCasciuc/atom-fit/internal/lib/mailer"
 	"github.com/stanislavCasciuc/atom-fit/internal/store"
 )
 
@@ -18,6 +19,10 @@ type registerUserPayload struct {
 	Email    string `json:"email"    validation:"required,email"`
 	Username string `json:"username" validation:"required,min=4,max=20"`
 	Password string `json:"password" validation:"required,min=8"`
+}
+
+type TokenResponse struct {
+	Token string `json:"token"`
 }
 
 func (h *Handlers) RegisterUserHandler(w http.ResponseWriter, r *http.Request) {
@@ -60,5 +65,17 @@ func (h *Handlers) RegisterUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.WriteHeader(http.StatusNoContent)
+	res := TokenResponse{
+		Token: plainToken,
+	}
+
+	if err := mailer.SendVerifyUser(u.Username, h.config.Mail.Addr, plainToken, h.config.Mail); err != nil {
+		h.resp.InternalServerError(w, r, err)
+		return
+	}
+
+	if err := response.WriteJSON(w, http.StatusOK, res); err != nil {
+		h.resp.InternalServerError(w, r, err)
+		return
+	}
 }

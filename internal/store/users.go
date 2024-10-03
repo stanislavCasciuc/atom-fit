@@ -2,7 +2,9 @@ package store
 
 import (
 	"context"
+	"crypto/sha256"
 	"database/sql"
+	"encoding/hex"
 	"errors"
 	"time"
 
@@ -24,6 +26,7 @@ type User struct {
 	Username  string   `json:"username"`
 	Password  password `json:"-"`
 	CreatedAt string   `json:"created_at"`
+	IsActive  bool     `json:"is_active"`
 }
 type password struct {
 	Text *string
@@ -87,6 +90,26 @@ func (s *UserStore) CreateAndInvite(
 	})
 }
 
+func (s *UserStore) Activate(ctx context.Context, token string) error {
+	return withTx(s.db, ctx, func(tx *sql.Tx) error {
+		u, err := s.getFormInviteToken(ctx, tx, token)
+		if err != nil {
+			return err
+		}
+
+		u.IsActive = true
+		if err := s.update(ctx, tx, u); err != nil {
+			return err
+		}
+
+		err = s.deleteInvitation(ctx, tx, u.ID)
+		if err != nil {
+			return err
+		}
+		return nil
+	})
+}
+
 func (s *UserStore) createInvite(
 	ctx context.Context,
 	tx *sql.Tx,
@@ -105,6 +128,75 @@ func (s *UserStore) createInvite(
 	_, err := tx.ExecContext(ctx, query, token, userID, time.Now().Add(exp))
 	if err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func (s *UserStore) deleteInvitation(ctx context.Context, tx *sql.Tx, userID int64) error {
+	query := ` 
+   DELETE FROM invitation WHERE user_id = $1
+	`
+
+	_, err := tx.ExecContext(ctx, query, userID)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *UserStore) getFormInviteToken(
+	ctx context.Context,
+	tx *sql.Tx,
+	plainToken string,
+) (*User, error) {
+	query := `
+		SELECT u.id, u.email, u.username,  u.is_active, u.created_at
+		FROM users u
+		JOIN invitation i ON u.id = i.user_id 
+		WHERE i.token = $1
+	`
+
+	hash := sha256.Sum256([]byte(plainToken))
+	hashToken := hex.EncodeToString(hash[:])
+
+	u := &User{}
+	err := tx.QueryRowContext(ctx, query, hashToken).Scan(
+		&u.ID,
+		&u.Email,
+		&u.Username,
+		&u.IsActive,
+		&u.CreatedAt,
+	)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, ErrNotFound
+		}
+		return nil, err
+	}
+
+	return u, nil
+}
+
+func (s *UserStore) update(ctx context.Context, tx *sql.Tx, u *User) error {
+	query := `
+    UPDATE users SET email = $1, username = $2, is_active = $3 WHERE id = $4
+  `
+
+	ctx, cancel := context.WithTimeout(ctx, QueryTimeDuration)
+	defer cancel()
+
+	_, err := tx.ExecContext(ctx, query, u.Email, u.Username, u.IsActive, u.ID)
+	if err != nil {
+		switch {
+		case err.Error() == `pq: duplicate key value violates unique constraint "users_email_key"`:
+			return ErrDuplicateEmail
+		case err.Error() == `pq: duplicate key value violates unique constraint "users_username_key"`:
+			return ErrDuplicateUsername
+		default:
+			return err
+		}
 	}
 
 	return nil
