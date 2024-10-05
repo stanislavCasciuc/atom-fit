@@ -41,3 +41,58 @@ func (h *Handlers) GetUserFromCtx(r *http.Request) *store.User {
 	u, _ := ctx.Value(middleware.UserCtx).(*store.User)
 	return u
 }
+
+func (h *Handlers) GetUserWithAttrHandler(w http.ResponseWriter, r *http.Request) {
+	u := h.GetUserFromCtx(r)
+	ua, err := h.store.Users.GetUserAttr(r.Context(), u.ID)
+	if err != nil {
+		h.resp.InternalServerError(w, r, err)
+		return
+	}
+	if ua == nil {
+		h.resp.NotFoundErorr(w, r, store.ErrNotFound)
+		return
+	}
+
+	u.UserAttr = *ua
+
+	if err := response.WriteJSON(w, http.StatusOK, u); err != nil {
+		h.resp.InternalServerError(w, r, err)
+		return
+	}
+}
+
+type LogWeightPayload struct {
+	Weight float32 `json:"weight" validate:"required"`
+}
+
+func (h *Handlers) LogWeightHandler(w http.ResponseWriter, r *http.Request) {
+	u := h.GetUserFromCtx(r)
+
+	var payload LogWeightPayload
+	if err := response.ReadJSON(w, r, &payload); err != nil {
+		h.resp.BadRequestError(w, r, err)
+		return
+	}
+
+	if err := response.Validate.Struct(payload); err != nil {
+		h.resp.BadRequestError(w, r, err)
+		return
+	}
+	if err := h.store.Users.AddUserWeight(r.Context(), u.ID, payload.Weight); err != nil {
+		if err == store.ErrConflict {
+			err = h.store.Users.UpdateUserWeight(r.Context(), u.ID, payload.Weight)
+			if err != nil {
+				h.resp.InternalServerError(w, r, err)
+				return
+			} else {
+				w.WriteHeader(http.StatusNoContent)
+				return
+			}
+		}
+		h.resp.InternalServerError(w, r, err)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
+}

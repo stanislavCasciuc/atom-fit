@@ -64,6 +64,11 @@ func (a *Application) Mount() http.Handler {
 				r.Post("/register", h.RegisterUserHandler)
 				r.Post("/login", h.LoginHandler)
 				r.With(m.AuthTokenMiddleware).Get("/", h.GetUserHandler)
+				r.Route("/attributes", func(r chi.Router) {
+					r.Use(m.AuthTokenMiddleware)
+					r.Get("/", h.GetUserWithAttrHandler)
+					r.Post("/log/weight/", h.LogWeightHandler)
+				})
 			})
 		})
 	})

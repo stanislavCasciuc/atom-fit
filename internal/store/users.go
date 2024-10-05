@@ -21,12 +21,13 @@ type UserStore struct {
 }
 
 type User struct {
-	ID        int64    `json:"id"`
-	Email     string   `json:"email"`
-	Username  string   `json:"username"`
-	Password  password `json:"-"`
-	CreatedAt string   `json:"created_at"`
-	IsActive  bool     `json:"is_active"`
+	ID        int64          `json:"id"`
+	Email     string         `json:"email"`
+	Username  string         `json:"username"`
+	Password  password       `json:"-"`
+	CreatedAt string         `json:"created_at"`
+	IsActive  bool           `json:"is_active"`
+	UserAttr  UserAttributes `json:"user_attr"`
 }
 type password struct {
 	Text *string
@@ -83,6 +84,15 @@ func (s *UserStore) CreateAndInvite(
 		}
 
 		if err := s.createInvite(ctx, tx, user.ID, token, exp); err != nil {
+			return err
+		}
+
+		user.UserAttr.UserID = user.ID
+		if err := s.addUserAttr(ctx, tx, user.UserAttr); err != nil {
+			return err
+		}
+
+		if err := s.addUserWeight(ctx, tx, user.ID, user.UserAttr.Weight); err != nil {
 			return err
 		}
 

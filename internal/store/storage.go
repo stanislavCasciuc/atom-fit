@@ -19,6 +19,9 @@ type Storage struct {
 		GetByID(context.Context, int64) (*User, error)
 		CreateAndInvite(context.Context, *User, string, time.Duration) error
 		Activate(context.Context, string) error
+		AddUserWeight(context.Context, int64, float32) error
+		GetUserAttr(context.Context, int64) (*UserAttributes, error)
+		UpdateUserWeight(context.Context, int64, float32) error
 	}
 }
 

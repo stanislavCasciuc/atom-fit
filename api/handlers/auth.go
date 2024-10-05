@@ -17,9 +17,14 @@ import (
 var exp = time.Duration(time.Hour * 24 * 3)
 
 type registerUserPayload struct {
-	Email    string `json:"email"    validation:"required,email"`
-	Username string `json:"username" validation:"required,min=4,max=20"`
-	Password string `json:"password" validation:"required,min=8"`
+	Email      string  `json:"email"       validate:"required,email"`
+	Username   string  `json:"username"    validate:"required,min=4,max=20"`
+	Password   string  `json:"password"    validate:"required,min=8"`
+	IsMale     bool    `json:"is_male"     validate:"required"`
+	Height     int     `json:"height"      validate:"max=250,min=100"`
+	Goal       string  `json:"goal"        validate:"required,oneof=lose gain maintain"`
+	WeightGoal float32 `json:"weight_goal"`
+	Weight     float32 `json:"weight"`
 }
 
 type TokenResponse struct {
@@ -41,6 +46,13 @@ func (h *Handlers) RegisterUserHandler(w http.ResponseWriter, r *http.Request) {
 	u := &store.User{
 		Email:    payload.Email,
 		Username: payload.Username,
+		UserAttr: store.UserAttributes{
+			IsMale:     payload.IsMale,
+			Height:     payload.Height,
+			Goal:       payload.Goal,
+			WeightGoal: payload.WeightGoal,
+			Weight:     payload.Weight,
+		},
 	}
 	if err := u.Password.Set(payload.Password); err != nil {
 		h.resp.InternalServerError(w, r, err)
