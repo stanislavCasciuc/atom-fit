@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 
 	"github.com/stanislavCasciuc/atom-fit/api/response"
@@ -69,12 +70,58 @@ func (h *Handlers) RegisterUserHandler(w http.ResponseWriter, r *http.Request) {
 		Token: plainToken,
 	}
 
-	if err := mailer.SendVerifyUser(u.Username, h.config.Mail.Addr, plainToken, h.config.Mail); err != nil {
+	go mailer.SendVerifyUser(u.Username, h.config.Mail.Addr, plainToken, h.config.Mail)
+
+	if err := response.WriteJSON(w, http.StatusOK, res); err != nil {
+		h.resp.InternalServerError(w, r, err)
+		return
+	}
+}
+
+type LoginPayload struct {
+	Email    string `json:"email"    validation:"required,email"`
+	Password string `json:"password" validation:"required,min=8"`
+}
+
+func (h *Handlers) LoginHandler(w http.ResponseWriter, r *http.Request) {
+	var payload LoginPayload
+	if err := response.ReadJSON(w, r, &payload); err != nil {
+		h.resp.BadRequestError(w, r, err)
+		return
+	}
+
+	if err := response.Validate.Struct(payload); err != nil {
+		h.resp.BadRequestError(w, r, err)
+		return
+	}
+
+	u, err := h.store.Users.GetByEmail(r.Context(), payload.Email)
+	if err != nil {
+		switch err {
+		case store.ErrNotFound:
+			h.resp.NotFoundErorr(w, r, err)
+		default:
+			h.resp.InternalServerError(w, r, err)
+		}
+		return
+	}
+
+	claims := jwt.MapClaims{
+		"sub": u.ID,
+		"exp": time.Now().Add(h.config.Auth.Iat).Unix(),
+		"iat": time.Now().Unix(),
+		"nbf": time.Now().Unix(),
+		"iss": h.config.Auth.Aud,
+		"aud": h.config.Auth.Aud,
+	}
+
+	token, err := h.authenticator.GenerateToken(claims)
+	if err != nil {
 		h.resp.InternalServerError(w, r, err)
 		return
 	}
 
-	if err := response.WriteJSON(w, http.StatusOK, res); err != nil {
+	if err := response.WriteJSON(w, http.StatusOK, token); err != nil {
 		h.resp.InternalServerError(w, r, err)
 		return
 	}

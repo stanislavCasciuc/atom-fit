@@ -35,3 +35,9 @@ func (resp *Responser) ConflictError(w http.ResponseWriter, r *http.Request, err
 
 	WriteJSONError(w, http.StatusConflict, err.Error())
 }
+
+func (resp *Responser) UnauthorizedError(w http.ResponseWriter, r *http.Request, err error) {
+	resp.logger.Warnw("unauthorized error", "method", r.Method, "path", r.URL.Path, "error", err)
+
+	WriteJSONError(w, http.StatusUnauthorized, err.Error())
+}

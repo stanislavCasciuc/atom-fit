@@ -4,9 +4,11 @@ import (
 	"bytes"
 	"html/template"
 	"log"
+	"time"
+
+	"gopkg.in/gomail.v2"
 
 	"github.com/stanislavCasciuc/atom-fit/internal/lib/config"
-	"gopkg.in/gomail.v2"
 )
 
 const userVerificationTemplPath = "./internal/lib/mailer/templates/verify-email.html"
@@ -19,9 +21,13 @@ func send(to []string, subject string, body string, emailCfg config.MailCfg) err
 	m.SetBody("text/html", body)
 
 	d := gomail.NewDialer(emailCfg.Host, emailCfg.Port, emailCfg.Addr, emailCfg.Password)
+	var err error
 
-	if err := d.DialAndSend(m); err != nil {
-		return err
+	for i := 0; i < 3; i++ {
+		if err = d.DialAndSend(m); err == nil {
+			return nil
+		}
+		time.Sleep(time.Second * 5)
 	}
 	return nil
 }

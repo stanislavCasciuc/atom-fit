@@ -1,6 +1,8 @@
 package main
 
 import (
+	"time"
+
 	_ "github.com/joho/godotenv/autoload"
 	_ "github.com/lib/pq"
 	"go.uber.org/zap"
@@ -13,6 +15,9 @@ import (
 )
 
 func main() {
+	iatEnvString := env.EnvString("IAT", "24h")
+	iatDuratioin, _ := time.ParseDuration(iatEnvString)
+
 	cfg := config.Config{
 		Addr: env.EnvString("ADDR", ":8080"),
 		DB: config.DbConfig{
@@ -30,6 +35,11 @@ func main() {
 			Host:     env.EnvString("EMAIL_HOST", ""),
 			Port:     env.IntEnv("EMAIL_PORT", 0),
 			Password: env.EnvString("EMAIL_PASS", ""),
+		},
+		Auth: config.Auth{
+			Secret: env.EnvString("SECRET", "secret"),
+			Aud:    env.EnvString("AUD", "atom-fit"),
+			Iat:    iatDuratioin,
 		},
 	}
 

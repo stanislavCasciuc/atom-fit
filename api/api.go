@@ -9,10 +9,16 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/stanislavCasciuc/atom-fit/api/handlers"
+	customMiddleware "github.com/stanislavCasciuc/atom-fit/api/middleware"
 	"github.com/stanislavCasciuc/atom-fit/api/response"
+	"github.com/stanislavCasciuc/atom-fit/internal/auth"
 	"github.com/stanislavCasciuc/atom-fit/internal/lib/config"
 	"github.com/stanislavCasciuc/atom-fit/internal/store"
 )
+
+type userKey string
+
+const UserCtx userKey = "user"
 
 type Application struct {
 	Config config.Config
@@ -36,7 +42,9 @@ func (a *Application) Run(mux http.Handler) error {
 
 func (a *Application) Mount() http.Handler {
 	resp := response.New(a.Log)
-	h := handlers.New(resp, a.Store, a.Config)
+	authenticator := auth.New(a.Config.Auth.Secret, a.Config.Auth.Aud)
+	h := handlers.New(resp, a.Store, a.Config, authenticator)
+	m := customMiddleware.New(a.Store, resp, authenticator)
 	r := chi.NewRouter()
 	r.Use(middleware.RequestID)
 	r.Use(middleware.RealIP)
@@ -54,6 +62,8 @@ func (a *Application) Mount() http.Handler {
 			r.Route("/users", func(r chi.Router) {
 				r.Put("/activate", h.ActivateUser)
 				r.Post("/register", h.RegisterUserHandler)
+				r.Post("/login", h.LoginHandler)
+				r.With(m.AuthTokenMiddleware).Get("/", h.GetUserHandler)
 			})
 		})
 	})

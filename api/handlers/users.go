@@ -3,7 +3,9 @@ package handlers
 import (
 	"net/http"
 
+	"github.com/stanislavCasciuc/atom-fit/api/middleware"
 	"github.com/stanislavCasciuc/atom-fit/api/response"
+	"github.com/stanislavCasciuc/atom-fit/internal/store"
 )
 
 type ActivationPayload struct {
@@ -24,4 +26,18 @@ func (h *Handlers) ActivateUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusNoContent)
+}
+
+func (h *Handlers) GetUserHandler(w http.ResponseWriter, r *http.Request) {
+	u := h.GetUserFromCtx(r)
+	if err := response.WriteJSON(w, http.StatusOK, u); err != nil {
+		h.resp.InternalServerError(w, r, err)
+		return
+	}
+}
+
+func (h *Handlers) GetUserFromCtx(r *http.Request) *store.User {
+	ctx := r.Context()
+	u, _ := ctx.Value(middleware.UserCtx).(*store.User)
+	return u
 }

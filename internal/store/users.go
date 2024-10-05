@@ -90,6 +90,44 @@ func (s *UserStore) CreateAndInvite(
 	})
 }
 
+func (s *UserStore) GetByEmail(ctx context.Context, email string) (*User, error) {
+	query := `
+		SELECT id, email, username, password, created_at, is_active FROM users WHERE email = $1
+	`
+
+	var pass []byte
+	u := &User{}
+	err := s.db.QueryRowContext(ctx, query, email).
+		Scan(&u.ID, &u.Email, &u.Username, &pass, &u.CreatedAt, &u.IsActive)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, ErrNotFound
+		}
+		return nil, err
+	}
+	u.Password.Hash = pass
+	return u, nil
+}
+
+func (s *UserStore) GetByID(ctx context.Context, id int64) (*User, error) {
+	query := `
+		SELECT id, email, username, password, created_at, is_active FROM users WHERE id = $1
+	`
+
+	var pass []byte
+	u := &User{}
+	err := s.db.QueryRowContext(ctx, query, id).
+		Scan(&u.ID, &u.Email, &u.Username, &pass, &u.CreatedAt, &u.IsActive)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, ErrNotFound
+		}
+		return nil, err
+	}
+	u.Password.Hash = pass
+	return u, nil
+}
+
 func (s *UserStore) Activate(ctx context.Context, token string) error {
 	return withTx(s.db, ctx, func(tx *sql.Tx) error {
 		u, err := s.getFormInviteToken(ctx, tx, token)
