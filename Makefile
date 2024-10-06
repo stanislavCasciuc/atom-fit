@@ -1,10 +1,12 @@
 include .env
 MIGRATION_PATH = ./db/migrations
+gen-docs:
+	@swag init -g ./main/main.go -d cmd,api,internal && swag fmt
 
 build:
 	@go build -o bin/social cmd/main/main.go
 
-run: build
+run: gen-docs build
 	@./bin/social
 
 migration:

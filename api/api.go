@@ -1,16 +1,19 @@
 package api
 
 import (
+	"fmt"
 	"net/http"
 	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	httpSwagger "github.com/swaggo/http-swagger/v2"
 	"go.uber.org/zap"
 
 	"github.com/stanislavCasciuc/atom-fit/api/handlers"
 	customMiddleware "github.com/stanislavCasciuc/atom-fit/api/middleware"
 	"github.com/stanislavCasciuc/atom-fit/api/response"
+	"github.com/stanislavCasciuc/atom-fit/docs"
 	"github.com/stanislavCasciuc/atom-fit/internal/auth"
 	"github.com/stanislavCasciuc/atom-fit/internal/lib/config"
 	"github.com/stanislavCasciuc/atom-fit/internal/store"
@@ -27,6 +30,8 @@ type Application struct {
 }
 
 func (a *Application) Run(mux http.Handler) error {
+	// Docs
+	docs.SwaggerInfo.Version = "1.0"
 	srv := &http.Server{
 		Addr:         a.Config.Addr,
 		Handler:      mux,
@@ -55,19 +60,24 @@ func (a *Application) Mount() http.Handler {
 	// through ctx.Done() that the request has timed out and further
 	// processing should be stopped.
 	r.Use(middleware.Timeout(60 * time.Second))
-
+	docsUrl := fmt.Sprintf("http://localhost%s/swagger/doc.json", a.Config.Addr)
+	r.Get("/swagger/*", httpSwagger.Handler(
+		httpSwagger.URL(docsUrl), // The url pointing to API definition
+	))
 	r.Route("/api", func(r chi.Router) {
 		r.Route("/v1", func(r chi.Router) {
 			r.Get("/health", h.HealthHandler)
-			r.Route("/users", func(r chi.Router) {
-				r.Put("/activate", h.ActivateUser)
+			r.Route("/auth", func(r chi.Router) {
 				r.Post("/register", h.RegisterUserHandler)
 				r.Post("/login", h.LoginHandler)
+			})
+			r.Route("/users", func(r chi.Router) {
+				r.Put("/activate", h.ActivateUser)
 				r.With(m.AuthTokenMiddleware).Get("/", h.GetUserHandler)
 				r.Route("/attributes", func(r chi.Router) {
 					r.Use(m.AuthTokenMiddleware)
 					r.Get("/", h.GetUserWithAttrHandler)
-					r.Post("/log/weight/", h.LogWeightHandler)
+					r.Post("/log/weight", h.LogWeightHandler)
 				})
 			})
 		})

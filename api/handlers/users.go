@@ -12,6 +12,16 @@ type ActivationPayload struct {
 	Token string `json:"token"`
 }
 
+// ActivateUser godoc
+//
+//	@Summary		Activate a ActivateUser
+//	@Description	Activate a user
+//	@Tags			users
+//	@Accept			json
+//	@Produce		json
+//	@Param			payload	body	ActivationPayload	true	"Activate User Payload"
+//	@Success		204		"No Content"
+//	@Router			/users/activate [post]
 func (h *Handlers) ActivateUser(w http.ResponseWriter, r *http.Request) {
 	var payload ActivationPayload
 	if err := response.ReadJSON(w, r, &payload); err != nil {
@@ -28,6 +38,15 @@ func (h *Handlers) ActivateUser(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
+// @GetUserHandler	godoc
+// @Summary		Get a user
+// @Description	Get a user
+// @Tags			users
+// @Accept			json
+// @Produce		json
+// @Success		200	{object}	store.User
+// @Security	 ApiKeyAuth
+// @Router			/users [get]
 func (h *Handlers) GetUserHandler(w http.ResponseWriter, r *http.Request) {
 	u := h.GetUserFromCtx(r)
 	if err := response.WriteJSON(w, http.StatusOK, u); err != nil {
@@ -42,15 +61,20 @@ func (h *Handlers) GetUserFromCtx(r *http.Request) *store.User {
 	return u
 }
 
+// @GetUserWithAttrHandler	godoc
+// @Summary				Get a user with attributes
+// @Description			Get a user with attributes
+// @Tags					users
+// @Accept					json
+// @Produce				json
+// @Success				200	{object}	store.User
+// @Security				ApiKeyAuth
+// @Router					/users/attributes [get]
 func (h *Handlers) GetUserWithAttrHandler(w http.ResponseWriter, r *http.Request) {
 	u := h.GetUserFromCtx(r)
 	ua, err := h.store.Users.GetUserAttr(r.Context(), u.ID)
 	if err != nil {
 		h.resp.InternalServerError(w, r, err)
-		return
-	}
-	if ua == nil {
-		h.resp.NotFoundErorr(w, r, store.ErrNotFound)
 		return
 	}
 
@@ -66,6 +90,19 @@ type LogWeightPayload struct {
 	Weight float32 `json:"weight" validate:"required"`
 }
 
+// LogWeightHandler godoc
+//
+//	@Summary		Log a LogWeight
+//	@Description	Log a user weight
+//	@Tags			users
+//	@Accept			json
+//	@Produce		json
+//	@Param			payload	body	LogWeightPayload	true	"Log Weight Payload"
+//	@Success		204		"No Content"
+//
+//	@Security		ApiKeyAuth
+//
+//	@Router			/users/attributes/log/weight [post]
 func (h *Handlers) LogWeightHandler(w http.ResponseWriter, r *http.Request) {
 	u := h.GetUserFromCtx(r)
 

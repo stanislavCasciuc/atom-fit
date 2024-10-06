@@ -14,6 +14,24 @@ import (
 	"github.com/stanislavCasciuc/atom-fit/internal/store"
 )
 
+//	@title			Atom Fit API
+//	@description	This is a sample server for Atom Fit API.
+//	@termsOfService	http://swagger.io/terms/
+
+//	@contact.name	API Support
+//	@contact.url	http://www.swagger.io/support
+//	@contact.email	support@swagger.io
+
+//	@license.name	Apache 2.0
+//	@license.url	http://www.apache.org/licenses/LICENSE-2.0.html
+
+// @BasePath					/api/v1
+//
+// @securityDefinitions.apikey	ApiKeyAuth
+// @in							header
+// @name						Authorization
+// @tokenUrl					/auth/login
+// @description
 func main() {
 	iatEnvString := env.EnvString("IAT", "24h")
 	iatDuratioin, _ := time.ParseDuration(iatEnvString)

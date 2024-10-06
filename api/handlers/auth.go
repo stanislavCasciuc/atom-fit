@@ -31,6 +31,16 @@ type TokenResponse struct {
 	Token string `json:"token"`
 }
 
+// RegisterUserHandler godoc
+//
+//	@Summary		Register a new
+//	@Description	Register a new user
+//	@Tags			auth
+//	@Accept			json
+//	@Produce		json
+//	@Param			payload	body		registerUserPayload	true	"Register User Payload"
+//	@Success		200		{object}	TokenResponse
+//	@Router			/auth/register [post]
 func (h *Handlers) RegisterUserHandler(w http.ResponseWriter, r *http.Request) {
 	var payload registerUserPayload
 	if err := response.ReadJSON(w, r, &payload); err != nil {
@@ -95,6 +105,16 @@ type LoginPayload struct {
 	Password string `json:"password" validation:"required,min=8"`
 }
 
+// LoginHandler godoc
+//
+//	@Summary		LoginHandler
+//	@Description	LoginHandler
+//	@Tags			auth
+//	@Accept			json
+//	@Produce		json
+//	@Param			payload	body		LoginPayload	true	"Login Payload"
+//	@Success		200		{object}	TokenResponse
+//	@Router			/auth/login [post]
 func (h *Handlers) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	var payload LoginPayload
 	if err := response.ReadJSON(w, r, &payload); err != nil {
@@ -132,8 +152,10 @@ func (h *Handlers) LoginHandler(w http.ResponseWriter, r *http.Request) {
 		h.resp.InternalServerError(w, r, err)
 		return
 	}
-
-	if err := response.WriteJSON(w, http.StatusOK, token); err != nil {
+	tokenStruct := TokenResponse{
+		Token: token,
+	}
+	if err := response.WriteJSON(w, http.StatusOK, tokenStruct); err != nil {
 		h.resp.InternalServerError(w, r, err)
 		return
 	}

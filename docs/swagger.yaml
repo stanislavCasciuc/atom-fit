@@ -1,0 +1,234 @@
+basePath: /api/v1
+definitions:
+  handlers.ActivationPayload:
+    properties:
+      token:
+        type: string
+    type: object
+  handlers.LogWeightPayload:
+    properties:
+      weight:
+        type: number
+    required:
+    - weight
+    type: object
+  handlers.LoginPayload:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
+  handlers.TokenResponse:
+    properties:
+      token:
+        type: string
+    type: object
+  handlers.registerUserPayload:
+    properties:
+      email:
+        type: string
+      goal:
+        enum:
+        - lose
+        - gain
+        - maintain
+        type: string
+      height:
+        maximum: 250
+        minimum: 100
+        type: integer
+      is_male:
+        type: boolean
+      password:
+        minLength: 8
+        type: string
+      username:
+        maxLength: 20
+        minLength: 4
+        type: string
+      weight:
+        type: number
+      weight_goal:
+        type: number
+    required:
+    - email
+    - goal
+    - is_male
+    - password
+    - username
+    type: object
+  store.User:
+    properties:
+      created_at:
+        type: string
+      email:
+        type: string
+      id:
+        type: integer
+      is_active:
+        type: boolean
+      user_attr:
+        $ref: '#/definitions/store.UserAttributes'
+      username:
+        type: string
+    type: object
+  store.UserAttributes:
+    properties:
+      goal:
+        enum:
+        - lose
+        - gain
+        - maintain
+        type: string
+      height:
+        type: integer
+      is_male:
+        type: boolean
+      user_id:
+        type: integer
+      weight:
+        type: number
+      weight_goal:
+        type: number
+    required:
+    - goal
+    type: object
+info:
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: http://www.swagger.io/support
+  description: This is a sample server for Atom Fit API.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Atom Fit API
+paths:
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: LoginHandler
+      parameters:
+      - description: Login Payload
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.LoginPayload'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.TokenResponse'
+      summary: LoginHandler
+      tags:
+      - auth
+  /auth/register:
+    post:
+      consumes:
+      - application/json
+      description: Register a new user
+      parameters:
+      - description: Register User Payload
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.registerUserPayload'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.TokenResponse'
+      summary: Register a new
+      tags:
+      - auth
+  /users:
+    get:
+      consumes:
+      - application/json
+      description: Get a user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/store.User'
+      security:
+      - ApiKeyAuth: []
+      summary: Get a user
+      tags:
+      - users
+  /users/activate:
+    post:
+      consumes:
+      - application/json
+      description: Activate a user
+      parameters:
+      - description: Activate User Payload
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.ActivationPayload'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+      summary: Activate a ActivateUser
+      tags:
+      - users
+  /users/attributes:
+    get:
+      consumes:
+      - application/json
+      description: Get a user with attributes
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/store.User'
+      security:
+      - ApiKeyAuth: []
+      summary: Get a user with attributes
+      tags:
+      - users
+  /users/attributes/log/weight:
+    post:
+      consumes:
+      - application/json
+      description: Log a user weight
+      parameters:
+      - description: Log Weight Payload
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.LogWeightPayload'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+      security:
+      - ApiKeyAuth: []
+      summary: Log a LogWeight
+      tags:
+      - users
+securityDefinitions:
+  ApiKeyAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
