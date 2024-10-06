@@ -23,11 +23,16 @@ type Storage struct {
 		GetUserAttr(context.Context, int64) (*UserAttributes, error)
 		UpdateUserWeight(context.Context, int64, float32) error
 	}
+	Exercises interface {
+		Create(context.Context, *Exercise) error
+		GetByID(context.Context, int64) (*Exercise, error)
+	}
 }
 
 func New(db *sql.DB) Storage {
 	return Storage{
-		Users: &UserStore{db},
+		Users:     &UserStore{db},
+		Exercises: &ExerciseStore{db},
 	}
 }
 

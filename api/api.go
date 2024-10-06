@@ -80,6 +80,10 @@ func (a *Application) Mount() http.Handler {
 					r.Post("/log/weight", h.LogWeightHandler)
 				})
 			})
+			r.Route("/exercises", func(r chi.Router) {
+				r.With(m.AuthTokenMiddleware).Post("/", h.CreateExerciseHandler)
+				r.Get("/{exerciseID}", h.GetExerciseHandler)
+			})
 		})
 	})
 	return r

@@ -58,6 +58,29 @@ definitions:
     - password
     - username
     type: object
+  store.Exercise:
+    properties:
+      created_at:
+        type: string
+      description:
+        type: string
+      duration:
+        type: integer
+      id:
+        type: integer
+      is_duration:
+        type: boolean
+      muscles:
+        items:
+          type: string
+        type: array
+      name:
+        type: string
+      tutorial_link:
+        type: string
+      user_id:
+        type: integer
+    type: object
   store.User:
     properties:
       created_at:
@@ -150,6 +173,51 @@ paths:
       summary: Register a new
       tags:
       - auth
+  /exercises:
+    post:
+      consumes:
+      - application/json
+      description: Create a new Exercise
+      parameters:
+      - description: Exercise Payload
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/store.Exercise'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/store.Exercise'
+      security:
+      - ApiKeyAuth: []
+      summary: Create a new Exercise
+      tags:
+      - exercises
+  /exercises/{exerciseID}:
+    get:
+      consumes:
+      - application/json
+      description: Get Exercise by id from param
+      parameters:
+      - description: Exercise ID
+        in: path
+        name: exerciseID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/store.Exercise'
+      summary: Get Exercise by id from param
+      tags:
+      - exercises
   /users:
     get:
       consumes:
