@@ -4,8 +4,11 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"log"
 
 	"github.com/lib/pq"
+
+	"github.com/stanislavCasciuc/atom-fit/internal/lib/mailer/pagination"
 )
 
 type Exercise struct {
@@ -22,6 +25,51 @@ type Exercise struct {
 
 type ExerciseStore struct {
 	db *sql.DB
+}
+
+func (s *ExerciseStore) GetAll(
+	ctx context.Context,
+	fq pagination.PaginatedQuery,
+) ([]Exercise, error) {
+	query := `
+		SELECT id, user_id, name, description, is_duration, duration, tutorial_link, created_at, muscles 
+    FROM exercises 
+    WHERE (name ILIKE '%' || $1 || '%' OR description ILIKE '%' || $1 || '%') AND 
+(muscles @> $2 OR $2 = '{}')
+    ORDER BY created_at ` + fq.Sort + `
+    LIMIT $3 OFFSET $4
+	`
+
+	rows, err := s.db.QueryContext(ctx, query, fq.Search, pq.Array(fq.Tags), fq.Limit, fq.Offset)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, ErrNotFound
+		}
+		return nil, err
+	}
+
+	var exercises []Exercise
+
+	for rows.Next() {
+		var e Exercise
+		log.Println(rows)
+		err := rows.Scan(
+			&e.ID,
+			&e.UserID,
+			&e.Name,
+			&e.Description,
+			&e.IsDuration,
+			&e.Duration,
+			&e.TutorialLink,
+			&e.CreatedAt,
+			pq.Array(&e.Muscles),
+		)
+		if err != nil {
+			return nil, err
+		}
+		exercises = append(exercises, e)
+	}
+	return exercises, nil
 }
 
 func (s *ExerciseStore) Create(ctx context.Context, e *Exercise) error {

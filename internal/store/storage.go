@@ -5,6 +5,8 @@ import (
 	"database/sql"
 	"errors"
 	"time"
+
+	"github.com/stanislavCasciuc/atom-fit/internal/lib/mailer/pagination"
 )
 
 var (
@@ -26,6 +28,7 @@ type Storage struct {
 	Exercises interface {
 		Create(context.Context, *Exercise) error
 		GetByID(context.Context, int64) (*Exercise, error)
+		GetAll(context.Context, pagination.PaginatedQuery) ([]Exercise, error)
 	}
 }
 

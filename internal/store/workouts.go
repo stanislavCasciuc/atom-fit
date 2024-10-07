@@ -28,20 +28,20 @@ type WorkoutStore struct {
 	db *sql.DB
 }
 
-func (s *WorkoutStore) GetWorkoutByID(ctx context.Context, id int64) (*Workout, err) {
-	query := `
-    SELECT w.id, w.user_id, w.name, w.description, w.tutorial_link, w.created_at, e.id, e.name, e.is_duration, we.duraion, e.description, e.tutorial_link, e.muscles 
-    FROM workouts w
-    LEFT JOIN workout_exercises we ON we.workout_id = w.id
-    JOIN exercise e ON we.exercise_id = e.id
-    WHERE w.id = 1
-    GROUP BY w.id 
-  `
-	w := &Workout{}
-
-	err := s.db.QueryRowContext(ctx, query, id).
-		Scan(&w.ID, &w.UserID, &w.Name, &w.Description, &w.TutorialLink, &w.CreatedAt, &w.WorkoutExercises.Exercise)
-}
+// func (s *WorkoutStore) GetWorkoutByID(ctx context.Context, id int64) (*Workout, err) {
+// 	query := `
+//     SELECT w.id, w.user_id, w.name, w.description, w.tutorial_link, w.created_at, e.id, e.name, e.is_duration, we.duraion, e.description, e.tutorial_link, e.muscles
+//     FROM workouts w
+//     LEFT JOIN workout_exercises we ON we.workout_id = w.id
+//     JOIN exercise e ON we.exercise_id = e.id
+//     WHERE w.id = 1
+//     GROUP BY w.id
+//   `
+// 	w := &Workout{}
+//
+// 	err := s.db.QueryRowContext(ctx, query, id).
+// 		Scan(&w.ID, &w.UserID, &w.Name, &w.Description, &w.TutorialLink, &w.CreatedAt, &w.WorkoutExercises.Exercise)
+// }
 
 func (s *WorkoutStore) createWorkout(ctx context.Context, tx *sql.Tx, w *Workout) error {
 	query := `
