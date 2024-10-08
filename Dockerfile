@@ -6,17 +6,13 @@ COPY go.mod go.sum ./
 
 RUN go mod download
 
-RUN go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
 
 RUN go install github.com/swaggo/swag/cmd/swag@latest 
 
 COPY . .
 RUN swag init -g ./main/main.go -d cmd,api,internal && swag fmt
 
-ENV MIGRATION_PATH ./db/migrations
-ARG DB_ADDR=postgres://postgres:password@localhost:5432/atom-fit?sslmode=disable
 
-RUN migrate -path=$MIGRATION_PATH -database=$DB_ADDR up
 
 RUN go build -o /app/bin/social cmd/main/main.go
 
