@@ -10,7 +10,6 @@ import (
 	"github.com/google/uuid"
 
 	"github.com/stanislavCasciuc/atom-fit/api/response"
-	"github.com/stanislavCasciuc/atom-fit/internal/lib/mailer"
 	"github.com/stanislavCasciuc/atom-fit/internal/store"
 )
 
@@ -92,7 +91,7 @@ func (h *Handlers) RegisterUserHandler(w http.ResponseWriter, r *http.Request) {
 		Token: plainToken,
 	}
 
-	go mailer.SendVerifyUser(u.Username, h.config.Mail.Addr, plainToken, h.config.Mail)
+	// go mailer.SendVerifyUser(u.Username, h.config.Mail.Addr, plainToken, h.config.Mail)
 
 	if err := response.WriteJSON(w, http.StatusOK, res); err != nil {
 		h.resp.InternalServerError(w, r, err)
