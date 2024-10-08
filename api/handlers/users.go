@@ -39,15 +39,15 @@ func (h *Handlers) ActivateUser(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
-//	@GetUserHandler	godoc
-//	@Summary		Get a user
-//	@Description	Get a user
-//	@Tags			users
-//	@Accept			json
-//	@Produce		json
-//	@Success		200	{object}	store.User
-//	@Security		ApiKeyAuth
-//	@Router			/users [get]
+// @GetUserHandler	godoc
+// @Summary		Get a user
+// @Description	Get a user
+// @Tags			users
+// @Accept			json
+// @Produce		json
+// @Success		200	{object}	store.User
+// @Security		ApiKeyAuth
+// @Router			/users [get]
 func (h *Handlers) GetUserHandler(w http.ResponseWriter, r *http.Request) {
 	u := h.GetUserFromCtx(r)
 	if err := response.WriteJSON(w, http.StatusOK, u); err != nil {
@@ -62,15 +62,15 @@ func (h *Handlers) GetUserFromCtx(r *http.Request) *store.User {
 	return u
 }
 
-//	@GetUserWithAttrHandler	godoc
-//	@Summary				Get a user with attributes
-//	@Description			Get a user with attributes
-//	@Tags					users
-//	@Accept					json
-//	@Produce				json
-//	@Success				200	{object}	store.User
-//	@Scurity				ApiKeyAuth
-//	@Router					/users/attributes [get]
+// @GetUserWithAttrHandler	godoc
+// @Summary				Get a user with attributes
+// @Description			Get a user with attributes
+// @Tags					users
+// @Accept					json
+// @Produce				json
+// @Success				200	{object}	store.User
+// @Security				ApiKeyAuth
+// @Router					/users/attributes [get]
 func (h *Handlers) GetUserWithAttrHandler(w http.ResponseWriter, r *http.Request) {
 	u := h.GetUserFromCtx(r)
 	ua, err := h.store.Users.GetUserAttr(r.Context(), u.ID)
@@ -135,17 +135,17 @@ func (h *Handlers) LogWeightHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
-//	@GetUserWeight	godoc
-//	@Summary		Get a user weight
-//	@Description	Get a user weight
-//	@Tags			users
-//	@Accept			json
-//	@Produce		json
-//	@Param			limit	query		int	false	"Limit"
-//	@Param			offset	query		int	false	"Offset"
-//	@Success		200		{object}	[]store.UserWeightByDate
-//	@Security		ApiKeyAuth
-//	@Router			/users/attributes/weight [get]
+// @GetUserWeight	godoc
+// @Summary		Get a user weight
+// @Description	Get a user weight
+// @Tags			users
+// @Accept			json
+// @Produce		json
+// @Param			limit	query		int	false	"Limit"
+// @Param			offset	query		int	false	"Offset"
+// @Success		200		{object}	[]store.UserWeightByDate
+// @Security		ApiKeyAuth
+// @Router			/users/attributes/weight [get]
 func (h *Handlers) GetUserWeight(w http.ResponseWriter, r *http.Request) {
 	u := h.GetUserFromCtx(r)
 	fq := pagination.PaginatedQuery{
