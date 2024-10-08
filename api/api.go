@@ -61,6 +61,10 @@ func (a *Application) Mount() http.Handler {
 		AllowedOrigins: []string{
 			env.EnvString("CORS_ALLOWED_ORIGIN", "http://localhost:3000"),
 			env.EnvString("CORS_ALLOWED_ORIGIN_PROD", "https://atom-fit.vercel.app"),
+			env.EnvString(
+				"CORS_ALLOWED_ORIGIN_PROD_BACKEND",
+				"https://grumpy-batsheva-atomfit-abf2aa42.koyeb.app",
+			),
 		},
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
