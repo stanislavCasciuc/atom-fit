@@ -95,6 +95,7 @@ func (a *Application) Mount() http.Handler {
 					r.Use(m.AuthTokenMiddleware)
 					r.Get("/", h.GetUserWithAttrHandler)
 					r.Post("/log/weight", h.LogWeightHandler)
+					r.Get("/weight", h.GetUserWeight)
 				})
 			})
 			r.Route("/exercises", func(r chi.Router) {

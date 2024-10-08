@@ -117,6 +117,13 @@ definitions:
     required:
     - goal
     type: object
+  store.UserWeightByDate:
+    properties:
+      date:
+        type: string
+      weight:
+        type: number
+    type: object
   store.Workout:
     properties:
       created_at:
@@ -311,7 +318,7 @@ paths:
       tags:
       - users
   /users/activate:
-    post:
+    put:
       consumes:
       - application/json
       description: Activate a user
@@ -342,8 +349,6 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/store.User'
-      security:
-      - ApiKeyAuth: []
       summary: Get a user with attributes
       tags:
       - users
@@ -367,6 +372,34 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Log a LogWeight
+      tags:
+      - users
+  /users/attributes/weight:
+    get:
+      consumes:
+      - application/json
+      description: Get a user weight
+      parameters:
+      - description: Limit
+        in: query
+        name: limit
+        type: integer
+      - description: Offset
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/store.UserWeightByDate'
+            type: array
+      security:
+      - ApiKeyAuth: []
+      summary: Get a user weight
       tags:
       - users
   /workouts:

@@ -260,7 +260,7 @@ const docTemplate = `{
             }
         },
         "/users/activate": {
-            "post": {
+            "put": {
                 "description": "Activate a user",
                 "consumes": [
                     "application/json"
@@ -292,11 +292,6 @@ const docTemplate = `{
         },
         "/users/attributes": {
             "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
                 "description": "Get a user with attributes",
                 "consumes": [
                     "application/json"
@@ -350,6 +345,51 @@ const docTemplate = `{
                 "responses": {
                     "204": {
                         "description": "No Content"
+                    }
+                }
+            }
+        },
+        "/users/attributes/weight": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get a user weight",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Get a user weight",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Limit",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Offset",
+                        "name": "offset",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/store.UserWeightByDate"
+                            }
+                        }
                     }
                 }
             }
@@ -561,6 +601,17 @@ const docTemplate = `{
                     "type": "number"
                 },
                 "weight_goal": {
+                    "type": "number"
+                }
+            }
+        },
+        "store.UserWeightByDate": {
+            "type": "object",
+            "properties": {
+                "date": {
+                    "type": "string"
+                },
+                "weight": {
                     "type": "number"
                 }
             }

@@ -24,6 +24,7 @@ type Storage struct {
 		AddUserWeight(context.Context, int64, float32) error
 		GetUserAttr(context.Context, int64) (*UserAttributes, error)
 		UpdateUserWeight(context.Context, int64, float32) error
+		GetUserWeight(context.Context, pagination.PaginatedQuery, int64) ([]UserWeightByDate, error)
 	}
 	Exercises interface {
 		Create(context.Context, *Exercise) error

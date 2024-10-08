@@ -5,6 +5,7 @@ import (
 
 	"github.com/stanislavCasciuc/atom-fit/api/middleware"
 	"github.com/stanislavCasciuc/atom-fit/api/response"
+	"github.com/stanislavCasciuc/atom-fit/internal/lib/mailer/pagination"
 	"github.com/stanislavCasciuc/atom-fit/internal/store"
 )
 
@@ -21,7 +22,7 @@ type ActivationPayload struct {
 //	@Produce		json
 //	@Param			payload	body	ActivationPayload	true	"Activate User Payload"
 //	@Success		204		"No Content"
-//	@Router			/users/activate [post]
+//	@Router			/users/activate [put]
 func (h *Handlers) ActivateUser(w http.ResponseWriter, r *http.Request) {
 	var payload ActivationPayload
 	if err := response.ReadJSON(w, r, &payload); err != nil {
@@ -38,15 +39,15 @@ func (h *Handlers) ActivateUser(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
-// @GetUserHandler	godoc
-// @Summary		Get a user
-// @Description	Get a user
-// @Tags			users
-// @Accept			json
-// @Produce		json
-// @Success		200	{object}	store.User
-// @Security	 ApiKeyAuth
-// @Router			/users [get]
+//	@GetUserHandler	godoc
+//	@Summary		Get a user
+//	@Description	Get a user
+//	@Tags			users
+//	@Accept			json
+//	@Produce		json
+//	@Success		200	{object}	store.User
+//	@Security		ApiKeyAuth
+//	@Router			/users [get]
 func (h *Handlers) GetUserHandler(w http.ResponseWriter, r *http.Request) {
 	u := h.GetUserFromCtx(r)
 	if err := response.WriteJSON(w, http.StatusOK, u); err != nil {
@@ -61,15 +62,15 @@ func (h *Handlers) GetUserFromCtx(r *http.Request) *store.User {
 	return u
 }
 
-// @GetUserWithAttrHandler	godoc
-// @Summary				Get a user with attributes
-// @Description			Get a user with attributes
-// @Tags					users
-// @Accept					json
-// @Produce				json
-// @Success				200	{object}	store.User
-// @Security				ApiKeyAuth
-// @Router					/users/attributes [get]
+//	@GetUserWithAttrHandler	godoc
+//	@Summary				Get a user with attributes
+//	@Description			Get a user with attributes
+//	@Tags					users
+//	@Accept					json
+//	@Produce				json
+//	@Success				200	{object}	store.User
+//	@Scurity				ApiKeyAuth
+//	@Router					/users/attributes [get]
 func (h *Handlers) GetUserWithAttrHandler(w http.ResponseWriter, r *http.Request) {
 	u := h.GetUserFromCtx(r)
 	ua, err := h.store.Users.GetUserAttr(r.Context(), u.ID)
@@ -132,4 +133,45 @@ func (h *Handlers) LogWeightHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusNoContent)
+}
+
+//	@GetUserWeight	godoc
+//	@Summary		Get a user weight
+//	@Description	Get a user weight
+//	@Tags			users
+//	@Accept			json
+//	@Produce		json
+//	@Param			limit	query		int	false	"Limit"
+//	@Param			offset	query		int	false	"Offset"
+//	@Success		200		{object}	[]store.UserWeightByDate
+//	@Security		ApiKeyAuth
+//	@Router			/users/attributes/weight [get]
+func (h *Handlers) GetUserWeight(w http.ResponseWriter, r *http.Request) {
+	u := h.GetUserFromCtx(r)
+	fq := pagination.PaginatedQuery{
+		Limit:  20,
+		Offset: 0,
+	}
+
+	fq, err := fq.Parse(r)
+	if err != nil {
+		h.resp.BadRequestError(w, r, err)
+		return
+	}
+
+	if err := response.Validate.Struct(fq); err != nil {
+		h.resp.BadRequestError(w, r, err)
+		return
+	}
+
+	uw, err := h.store.Users.GetUserWeight(r.Context(), fq, u.ID)
+	if err != nil {
+		h.resp.InternalServerError(w, r, err)
+		return
+	}
+
+	if err := response.WriteJSON(w, http.StatusOK, uw); err != nil {
+		h.resp.InternalServerError(w, r, err)
+		return
+	}
 }

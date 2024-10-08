@@ -6,6 +6,8 @@ import (
 	"errors"
 
 	"github.com/lib/pq"
+
+	"github.com/stanislavCasciuc/atom-fit/internal/lib/mailer/pagination"
 )
 
 type UserAttributes struct {
@@ -15,6 +17,11 @@ type UserAttributes struct {
 	Goal       string  `json:"goal"        validate:"required,oneof=lose gain maintain"`
 	WeightGoal float32 `json:"weight_goal"`
 	Weight     float32 `json:"weight"`
+}
+
+type UserWeightByDate struct {
+	Date   string  `json:"date"`
+	Weight float32 `json:"weight"`
 }
 
 var ErrConflict = errors.New("conflict violation")
@@ -78,6 +85,34 @@ func (s *UserStore) GetUserAttr(ctx context.Context, userID int64) (*UserAttribu
 	}
 
 	return userAttr, nil
+}
+
+func (s *UserStore) GetUserWeight(
+	ctx context.Context,
+	fq pagination.PaginatedQuery,
+	userID int64,
+) ([]UserWeightByDate, error) {
+	query := `
+	SELECT date, weight FROM user_weight
+	WHERE user_ID = $1
+	LIMIT $2 OFFSET $3
+  `
+
+	rows, err := s.db.QueryContext(ctx, query, userID, fq.Limit, fq.Offset)
+	if err != nil {
+		return nil, err
+	}
+	var userWeight []UserWeightByDate
+	for rows.Next() {
+		var uw UserWeightByDate
+		err := rows.Scan(&uw.Date, &uw.Weight)
+		if err != nil {
+			return nil, err
+		}
+		userWeight = append(userWeight, uw)
+
+	}
+	return userWeight, nil
 }
 
 func (s *UserStore) getLastWeight(
