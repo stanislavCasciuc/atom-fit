@@ -353,6 +353,42 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/workouts": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Create a new workout",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "workouts"
+                ],
+                "summary": "Create a new workout",
+                "parameters": [
+                    {
+                        "description": "Create Workout Payload",
+                        "name": "payload",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/store.Workout"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -526,6 +562,52 @@ const docTemplate = `{
                 },
                 "weight_goal": {
                     "type": "number"
+                }
+            }
+        },
+        "store.Workout": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "tutorial_link": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "integer"
+                },
+                "workout_exercises": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/store.WorkoutExercises"
+                    }
+                }
+            }
+        },
+        "store.WorkoutExercises": {
+            "type": "object",
+            "properties": {
+                "duration": {
+                    "type": "integer"
+                },
+                "exercise": {
+                    "$ref": "#/definitions/store.Exercise"
+                },
+                "exercise_id": {
+                    "type": "integer"
+                },
+                "workout_id": {
+                    "type": "integer"
                 }
             }
         }

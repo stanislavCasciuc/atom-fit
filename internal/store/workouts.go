@@ -3,6 +3,7 @@ package store
 import (
 	"context"
 	"database/sql"
+	"errors"
 
 	"github.com/lib/pq"
 )
@@ -42,6 +43,25 @@ type WorkoutStore struct {
 // 	err := s.db.QueryRowContext(ctx, query, id).
 // 		Scan(&w.ID, &w.UserID, &w.Name, &w.Description, &w.TutorialLink, &w.CreatedAt, &w.WorkoutExercises.Exercise)
 // }
+
+func (s *WorkoutStore) Create(ctx context.Context, w *Workout) error {
+	return withTx(s.db, ctx, func(tx *sql.Tx) error {
+		if err := s.createWorkout(ctx, tx, w); err != nil {
+			return err
+		}
+
+		for _, e := range w.WorkoutExercises {
+			e.WorkoutID = w.ID
+			if err := s.addExerciseToWorkout(ctx, tx, &e); err != nil {
+				if errors.Is(err, ErrConflict) {
+					continue
+				}
+				return err
+			}
+		}
+		return nil
+	})
+}
 
 func (s *WorkoutStore) createWorkout(ctx context.Context, tx *sql.Tx, w *Workout) error {
 	query := `

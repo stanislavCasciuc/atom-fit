@@ -117,6 +117,36 @@ definitions:
     required:
     - goal
     type: object
+  store.Workout:
+    properties:
+      created_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      tutorial_link:
+        type: string
+      user_id:
+        type: integer
+      workout_exercises:
+        items:
+          $ref: '#/definitions/store.WorkoutExercises'
+        type: array
+    type: object
+  store.WorkoutExercises:
+    properties:
+      duration:
+        type: integer
+      exercise:
+        $ref: '#/definitions/store.Exercise'
+      exercise_id:
+        type: integer
+      workout_id:
+        type: integer
+    type: object
 info:
   contact:
     email: support@swagger.io
@@ -339,6 +369,28 @@ paths:
       summary: Log a LogWeight
       tags:
       - users
+  /workouts:
+    post:
+      consumes:
+      - application/json
+      description: Create a new workout
+      parameters:
+      - description: Create Workout Payload
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/store.Workout'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+      security:
+      - ApiKeyAuth: []
+      summary: Create a new workout
+      tags:
+      - workouts
 securityDefinitions:
   ApiKeyAuth:
     in: header

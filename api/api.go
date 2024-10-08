@@ -7,6 +7,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/cors"
 	httpSwagger "github.com/swaggo/http-swagger/v2"
 	"go.uber.org/zap"
 
@@ -15,6 +16,7 @@ import (
 	"github.com/stanislavCasciuc/atom-fit/api/response"
 	"github.com/stanislavCasciuc/atom-fit/docs"
 	"github.com/stanislavCasciuc/atom-fit/internal/auth"
+	"github.com/stanislavCasciuc/atom-fit/internal/env"
 	"github.com/stanislavCasciuc/atom-fit/internal/lib/config"
 	"github.com/stanislavCasciuc/atom-fit/internal/store"
 )
@@ -55,6 +57,17 @@ func (a *Application) Mount() http.Handler {
 	r.Use(middleware.RealIP)
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
+	r.Use(cors.Handler(cors.Options{
+		AllowedOrigins: []string{
+			env.EnvString("CORS_ALLOWED_ORIGIN", "http://localhost:3000"),
+			env.EnvString("CORS_ALLOWED_ORIGIN_PROD", "https://atom-fit.vercel.app"),
+		},
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
+		ExposedHeaders:   []string{"Link"},
+		AllowCredentials: false,
+		MaxAge:           300, // Maximum value not ignored by any of major browsers
+	}))
 
 	// Set a timeout value on the request context (ctx), that will signal
 	// through ctx.Done() that the request has timed out and further
@@ -84,6 +97,9 @@ func (a *Application) Mount() http.Handler {
 				r.With(m.AuthTokenMiddleware).Post("/", h.CreateExerciseHandler)
 				r.Get("/{exerciseID}", h.GetExerciseHandler)
 				r.Get("/", h.GetAllExercisesHandler)
+			})
+			r.Route("/workouts", func(r chi.Router) {
+				r.With(m.AuthTokenMiddleware).Post("/", h.CreateWorkoutHandler)
 			})
 		})
 	})

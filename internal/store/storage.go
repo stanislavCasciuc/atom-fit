@@ -30,12 +30,16 @@ type Storage struct {
 		GetByID(context.Context, int64) (*Exercise, error)
 		GetAll(context.Context, pagination.PaginatedQuery) ([]Exercise, error)
 	}
+	Workouts interface {
+		Create(context.Context, *Workout) error
+	}
 }
 
 func New(db *sql.DB) Storage {
 	return Storage{
 		Users:     &UserStore{db},
 		Exercises: &ExerciseStore{db},
+		Workouts:  &WorkoutStore{db},
 	}
 }
 
