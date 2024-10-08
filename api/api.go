@@ -73,7 +73,7 @@ func (a *Application) Mount() http.Handler {
 	// through ctx.Done() that the request has timed out and further
 	// processing should be stopped.
 	r.Use(middleware.Timeout(60 * time.Second))
-	docsUrl := fmt.Sprintf("http://localhost%s/swagger/doc.json", a.Config.Addr)
+	docsUrl := fmt.Sprintf("%s/swagger/doc.json", a.Config.CompleteAddr)
 	r.Get("/swagger/*", httpSwagger.Handler(
 		httpSwagger.URL(docsUrl), // The url pointing to API definition
 	))

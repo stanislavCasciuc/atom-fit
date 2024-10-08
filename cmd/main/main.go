@@ -37,7 +37,8 @@ func main() {
 	iatDuratioin, _ := time.ParseDuration(iatEnvString)
 
 	cfg := config.Config{
-		Addr: env.EnvString("ADDR", ":8080"),
+		Addr:         env.EnvString("ADDR", ":8080"),
+		CompleteAddr: env.EnvString("COMPL_ADDR", "https://localhost:8080"),
 		DB: config.DbConfig{
 			Addr: env.EnvString(
 				"DB_ADDR",

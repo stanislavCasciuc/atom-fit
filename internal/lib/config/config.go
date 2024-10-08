@@ -3,11 +3,12 @@ package config
 import "time"
 
 type Config struct {
-	Addr string
-	DB   DbConfig
-	Env  string
-	Mail MailCfg
-	Auth Auth
+	Addr         string
+	CompleteAddr string
+	DB           DbConfig
+	Env          string
+	Mail         MailCfg
+	Auth         Auth
 }
 
 type MailCfg struct {
