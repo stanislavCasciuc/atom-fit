@@ -5,6 +5,32 @@ definitions:
       token:
         type: string
     type: object
+  handlers.CreateWorkoutExercisePayload:
+    properties:
+      duration:
+        type: integer
+      exercise_id:
+        type: integer
+    required:
+    - duration
+    - exercise_id
+    type: object
+  handlers.CreateWorkoutPayload:
+    properties:
+      description:
+        type: string
+      exercises:
+        items:
+          $ref: '#/definitions/handlers.CreateWorkoutExercisePayload'
+        type: array
+      name:
+        type: string
+      tutorial_link:
+        type: string
+    required:
+    - exercises
+    - name
+    type: object
   handlers.LogWeightPayload:
     properties:
       weight:
@@ -419,7 +445,7 @@ paths:
         name: payload
         required: true
         schema:
-          $ref: '#/definitions/store.Workout'
+          $ref: '#/definitions/handlers.CreateWorkoutPayload'
       produces:
       - application/json
       responses:
@@ -447,6 +473,10 @@ paths:
       - description: Sort
         in: query
         name: sort
+        type: string
+      - description: Tags
+        in: query
+        name: tags
         type: string
       - description: Search
         in: query

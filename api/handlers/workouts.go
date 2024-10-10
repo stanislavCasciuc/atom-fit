@@ -12,20 +12,31 @@ import (
 	"github.com/stanislavCasciuc/atom-fit/internal/store"
 )
 
+type CreateWorkoutPayload struct {
+	Name             string                         `json:"name"          validate:"required"`
+	Description      string                         `json:"description"`
+	TutorialLink     string                         `json:"tutorial_link"`
+	ExercisesWorkout []CreateWorkoutExercisePayload `json:"exercises"     validate:"required"`
+}
+type CreateWorkoutExercisePayload struct {
+	ExerciseID int64 `json:"exercise_id" validate:"required"`
+	Duration   int   `json:"duration"    validate:"required"`
+}
+
 // @CreateWorkout	godoc
 // @Summary		Create a new workout
 // @Description	Create a new workout
 // @Tags			workouts
 // @Accept			json
 // @Produce		json
-// @Param			payload	body	store.Workout	true	"Create Workout Payload"
+// @Param			payload	body	CreateWorkoutPayload true	"Create Workout Payload"
 // @Success		204		"No Content"
 // @Security		ApiKeyAuth
 // @Router			/workouts [post]
 func (h *Handlers) CreateWorkoutHandler(w http.ResponseWriter, r *http.Request) {
 	u := h.GetUserFromCtx(r)
 
-	var payload store.Workout
+	var payload CreateWorkoutPayload
 	if err := response.ReadJSON(w, r, &payload); err != nil {
 		h.resp.BadRequestError(w, r, err)
 		return
@@ -35,15 +46,28 @@ func (h *Handlers) CreateWorkoutHandler(w http.ResponseWriter, r *http.Request) 
 		h.resp.BadRequestError(w, r, err)
 		return
 	}
-	payload.UserID = u.ID
-
-	err := h.store.Workouts.Create(r.Context(), &payload)
+	workout := store.Workout{
+		UserID:       u.ID,
+		Name:         payload.Name,
+		Description:  payload.Description,
+		TutorialLink: payload.TutorialLink,
+	}
+	for _, e := range payload.ExercisesWorkout {
+		workout.WorkoutExercises = append(workout.WorkoutExercises, store.WorkoutExercises{
+			ExerciseID: e.ExerciseID,
+			Duration:   e.Duration,
+		})
+	}
+	err := h.store.Workouts.Create(r.Context(), &workout)
 	if err != nil {
 		h.resp.InternalServerError(w, r, err)
 		return
 	}
 
-	w.WriteHeader(http.StatusNoContent)
+	if err := response.WriteSuccess(w); err != nil {
+		h.resp.InternalServerError(w, r, err)
+		return
+	}
 }
 
 // @GetAllWorkouts	godoc
@@ -55,6 +79,7 @@ func (h *Handlers) CreateWorkoutHandler(w http.ResponseWriter, r *http.Request) 
 // @Param			limit	query		int		false	"Limit"
 // @Param			offset	query		int		false	"Offset"
 // @Param			sort	query		string	false	"Sort"
+// @Param			tags	query		string	false	"Tags"
 // @Param			search	query		string	false	"Search"
 // @Success		200		{object}	[]store.Workout
 // @Router			/workouts/ [get]

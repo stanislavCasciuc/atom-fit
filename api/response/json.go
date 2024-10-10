@@ -36,3 +36,7 @@ func WriteJSONError(w http.ResponseWriter, status int, message string) error {
 
 	return WriteJSON(w, status, &envelope{Error: message})
 }
+
+func WriteSuccess(w http.ResponseWriter) error {
+	return WriteJSON(w, http.StatusOK, map[string]string{"status": "success"})
+}

@@ -39,9 +39,10 @@ func (s *WorkoutStore) GetAll(
 	SELECT w.id, w.user_id, w.name, w.description, w.tutorial_link, w.created_at 
 	FROM workouts w 
 	LEFT JOIN workout_exercises we ON we.workout_id = w.id 
-	JOIN exercises e ON we.exercise_id = e.id 
+ LEFT	JOIN exercises e ON we.exercise_id = e.id 
   WHERE (e.name ILIKE '%' || $1 || '%' OR e.description ILIKE '%' || $1 || '%' OR w.name ILIKE '%' || $1 || '%' OR w.description ILIKE '%' || $1 || '%') AND 
 (e.muscles @> $2 OR $2 = '{}')
+	GROUP BY w.id
   ORDER BY w.created_at ` + fq.Sort + `
   LIMIT $3 OFFSET $4
   `

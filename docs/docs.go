@@ -424,7 +424,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/store.Workout"
+                            "$ref": "#/definitions/handlers.CreateWorkoutPayload"
                         }
                     }
                 ],
@@ -465,6 +465,12 @@ const docTemplate = `{
                         "type": "string",
                         "description": "Sort",
                         "name": "sort",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Tags",
+                        "name": "tags",
                         "in": "query"
                     },
                     {
@@ -525,6 +531,45 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "token": {
+                    "type": "string"
+                }
+            }
+        },
+        "handlers.CreateWorkoutExercisePayload": {
+            "type": "object",
+            "required": [
+                "duration",
+                "exercise_id"
+            ],
+            "properties": {
+                "duration": {
+                    "type": "integer"
+                },
+                "exercise_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "handlers.CreateWorkoutPayload": {
+            "type": "object",
+            "required": [
+                "exercises",
+                "name"
+            ],
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "exercises": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/handlers.CreateWorkoutExercisePayload"
+                    }
+                },
+                "name": {
+                    "type": "string"
+                },
+                "tutorial_link": {
                     "type": "string"
                 }
             }

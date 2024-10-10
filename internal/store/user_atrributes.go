@@ -17,7 +17,7 @@ type UserAttributes struct {
 	Goal       string  `json:"goal"        validate:"required,oneof=lose gain maintain"`
 	WeightGoal float32 `json:"weight_goal"`
 	Weight     float32 `json:"weight"`
-	Age        int     `json:"age"`
+	Age        int64   `json:"age"`
 }
 
 type UserWeightByDate struct {
