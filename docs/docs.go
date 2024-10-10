@@ -292,6 +292,11 @@ const docTemplate = `{
         },
         "/users/attributes": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Get a user with attributes",
                 "consumes": [
                     "application/json"
@@ -429,6 +434,58 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/workouts/": {
+            "get": {
+                "description": "Get all workouts",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "workouts"
+                ],
+                "summary": "Get all workouts",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Limit",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Offset",
+                        "name": "offset",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Sort",
+                        "name": "sort",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Search",
+                        "name": "search",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/store.Workout"
+                            }
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -480,6 +537,9 @@ const docTemplate = `{
                 "username"
             ],
             "properties": {
+                "age": {
+                    "type": "integer"
+                },
                 "email": {
                     "type": "string"
                 },
@@ -580,6 +640,9 @@ const docTemplate = `{
                 "goal"
             ],
             "properties": {
+                "age": {
+                    "type": "integer"
+                },
                 "goal": {
                     "type": "string",
                     "enum": [

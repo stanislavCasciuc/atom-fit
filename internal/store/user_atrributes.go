@@ -17,6 +17,7 @@ type UserAttributes struct {
 	Goal       string  `json:"goal"        validate:"required,oneof=lose gain maintain"`
 	WeightGoal float32 `json:"weight_goal"`
 	Weight     float32 `json:"weight"`
+	Age        int     `json:"age"`
 }
 
 type UserWeightByDate struct {
@@ -66,7 +67,7 @@ func (s *UserStore) UpdateUserWeight(
 // this return WITH last logged weight
 func (s *UserStore) GetUserAttr(ctx context.Context, userID int64) (*UserAttributes, error) {
 	query := `
-	SELECT ua.user_id, ua.is_male, ua.height, ua.goal, ua.weight_goal, uw.weight 
+	SELECT ua.user_id, ua.is_male, ua.height, ua.goal, ua.weight_goal, uw.weight, ua.age 
 	FROM user_attributes ua 
 	JOIN user_weight uw ON ua.user_id = uw.user_id 
 	WHERE ua.user_id = $1 AND uw.user_id = $1 
@@ -79,7 +80,8 @@ func (s *UserStore) GetUserAttr(ctx context.Context, userID int64) (*UserAttribu
 		&userAttr.Height,
 		&userAttr.Goal,
 		&userAttr.WeightGoal,
-		&userAttr.Weight)
+		&userAttr.Weight,
+		&userAttr.Age)
 	if err != nil {
 		return nil, err
 	}
@@ -143,7 +145,7 @@ func (s *UserStore) getUserAttr(
 	userID int64,
 ) (UserAttributes, error) {
 	query := `
-		SELECT user_id, is_male, height, goal, weight_goal FROM user_attributes WHERE user_id = $1
+		SELECT user_id, is_male, height, goal, weight_goal, age FROM user_attributes WHERE user_id = $1
 	`
 	var userAttr UserAttributes
 
@@ -152,7 +154,8 @@ func (s *UserStore) getUserAttr(
 		&userAttr.IsMale,
 		&userAttr.Height,
 		&userAttr.Goal,
-		&userAttr.WeightGoal)
+		&userAttr.WeightGoal,
+		&userAttr.Age)
 	if err != nil {
 		return userAttr, err
 	}
@@ -204,7 +207,7 @@ func (s *UserStore) addUserAttr(
 	userAttr UserAttributes,
 ) error {
 	query := `
-    INSERT INTO user_attributes (user_id, is_male, height, goal, weight_goal) VALUES ($1, $2,$3,$4,$5)
+    INSERT INTO user_attributes (user_id, is_male, height, goal, weight_goal, age) VALUES ($1, $2,$3,$4,$5,$6)
   `
 
 	_, err := tx.ExecContext(
@@ -215,6 +218,7 @@ func (s *UserStore) addUserAttr(
 		userAttr.Height,
 		userAttr.Goal,
 		userAttr.WeightGoal,
+		userAttr.Age,
 	)
 	if err != nil {
 		return err

@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/stanislavCasciuc/atom-fit/api/response"
+	"github.com/stanislavCasciuc/atom-fit/internal/lib/mailer/pagination"
 	"github.com/stanislavCasciuc/atom-fit/internal/store"
 )
 
@@ -39,4 +40,46 @@ func (h *Handlers) CreateWorkoutHandler(w http.ResponseWriter, r *http.Request) 
 	}
 
 	w.WriteHeader(http.StatusNoContent)
+}
+
+//	@GetAllWorkouts	godoc
+//	@Summary		Get all workouts
+//	@Description	Get all workouts
+//	@Tags			workouts
+//	@Accept			json
+//	@Produce		json
+//	@Param			limit	query		int		false	"Limit"
+//	@Param			offset	query		int		false	"Offset"
+//	@Param			sort	query		string	false	"Sort"
+//	@Param			search	query		string	false	"Search"
+//	@Success		200		{object}	[]store.Workout
+//	@Router			/workouts/ [get]
+func (h *Handlers) GetAllWorkouts(w http.ResponseWriter, r *http.Request) {
+	fq := pagination.PaginatedQuery{
+		Limit:  20,
+		Offset: 0,
+		Sort:   "desc",
+	}
+
+	fq, err := fq.Parse(r)
+	if err != nil {
+		h.resp.BadRequestError(w, r, err)
+		return
+	}
+
+	if err := response.Validate.Struct(fq); err != nil {
+		h.resp.BadRequestError(w, r, err)
+		return
+	}
+
+	workouts, err := h.store.Workouts.GetAll(r.Context(), fq)
+	if err != nil {
+		h.resp.InternalServerError(w, r, err)
+		return
+	}
+
+	if err := response.WriteJSON(w, http.StatusOK, workouts); err != nil {
+		h.resp.InternalServerError(w, r, err)
+		return
+	}
 }

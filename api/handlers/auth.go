@@ -24,6 +24,7 @@ type registerUserPayload struct {
 	Goal       string  `json:"goal"        validate:"required,oneof=lose gain maintain"`
 	WeightGoal float32 `json:"weight_goal"`
 	Weight     float32 `json:"weight"`
+	Age        int     `json:"age"`
 }
 
 type TokenResponse struct {
@@ -61,6 +62,7 @@ func (h *Handlers) RegisterUserHandler(w http.ResponseWriter, r *http.Request) {
 			Goal:       payload.Goal,
 			WeightGoal: payload.WeightGoal,
 			Weight:     payload.Weight,
+			Age:        payload.Age,
 		},
 	}
 	if err := u.Password.Set(payload.Password); err != nil {
