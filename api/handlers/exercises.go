@@ -12,23 +12,23 @@ import (
 	"github.com/stanislavCasciuc/atom-fit/internal/store"
 )
 
-// @GetAllExercises	godoc
-// @Summary			Get all Exercises
-// @Description		Get all Exercises
-// @Tags				exercises
-// @Accept				json
-// @Produce			json
+//	@GetAllExercises	godoc
+//	@Summary			Get all Exercises
+//	@Description		Get all Exercises
+//	@Tags				exercises
+//	@Accept				json
+//	@Produce			json
 //
-// @Param				since	query		string	false	"Since"
-// @Param				until	query		string	false	"Until"
-// @Param				limit	query		int		false	"Limit"
-// @Param				offset	query		int		false	"Offset"
-// @Param				sort	query		string	false	"Sort"
-// @Param				tags	query		string	false	"Tags"
-// @Param				search	query		string	false	"Search"
+//	@Param				since	query		string	false	"Since"
+//	@Param				until	query		string	false	"Until"
+//	@Param				limit	query		int		false	"Limit"
+//	@Param				offset	query		int		false	"Offset"
+//	@Param				sort	query		string	false	"Sort"
+//	@Param				tags	query		string	false	"Tags"
+//	@Param				search	query		string	false	"Search"
 //
-// @Success			200		{object}	[]store.Exercise
-// @Router				/exercises [get]
+//	@Success			200		{object}	[]store.Exercise
+//	@Router				/exercises [get]
 func (h *Handlers) GetAllExercisesHandler(w http.ResponseWriter, r *http.Request) {
 	fq := pagination.PaginatedQuery{
 		Limit:  20,
@@ -61,16 +61,16 @@ func (h *Handlers) GetAllExercisesHandler(w http.ResponseWriter, r *http.Request
 	}
 }
 
-// @CreateExerciseHandler	godoc
-// @Summary				Create a new Exercise
-// @Description			Create a new Exercise
-// @Tags					exercises
-// @Accept					json
-// @Produce				json
-// @Param					payload	body		store.Exercise	true	"Exercise Payload"
-// @Success				201		{object}	store.Exercise
-// @Security				ApiKeyAuth
-// @Router					/exercises [post]
+//	@CreateExerciseHandler	godoc
+//	@Summary				Create a new Exercise
+//	@Description			Create a new Exercise
+//	@Tags					exercises
+//	@Accept					json
+//	@Produce				json
+//	@Param					payload	body		store.Exercise	true	"Exercise Payload"
+//	@Success				201		{object}	store.Exercise
+//	@Security				ApiKeyAuth
+//	@Router					/exercises [post]
 func (h *Handlers) CreateExerciseHandler(w http.ResponseWriter, r *http.Request) {
 	u := h.GetUserFromCtx(r)
 
@@ -97,15 +97,15 @@ func (h *Handlers) CreateExerciseHandler(w http.ResponseWriter, r *http.Request)
 	}
 }
 
-// @GetExercisesHandler	godoc
-// @Summary				Get Exercise by id from param
-// @Description			Get Exercise by id from param
-// @Tags					exercises
-// @Accept					json
-// @Produce				json
-// @Param					exerciseID	path		int	true	"Exercise ID"
-// @Success				200			{object}	store.Exercise
-// @Router					/exercises/{exerciseID} [get]
+//	@GetExercisesHandler	godoc
+//	@Summary				Get Exercise by id from param
+//	@Description			Get Exercise by id from param
+//	@Tags					exercises
+//	@Accept					json
+//	@Produce				json
+//	@Param					id	path		int	true	"Exercise ID"
+//	@Success				200	{object}	store.Exercise
+//	@Router					/exercises/{id} [get]
 func (h *Handlers) GetExerciseHandler(w http.ResponseWriter, r *http.Request) {
 	exerciseID := chi.URLParam(r, "exerciseID")
 	id, err := strconv.ParseInt(exerciseID, 10, 64)

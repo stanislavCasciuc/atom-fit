@@ -104,6 +104,7 @@ func (a *Application) Mount() http.Handler {
 				r.Get("/", h.GetAllExercisesHandler)
 			})
 			r.Route("/workouts", func(r chi.Router) {
+				r.Get("/{workoutID}", h.GetWorkout)
 				r.With(m.AuthTokenMiddleware).Post("/", h.CreateWorkoutHandler)
 				r.Get("/", h.GetAllWorkouts)
 			})

@@ -199,7 +199,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/exercises/{exerciseID}": {
+        "/exercises/{id}": {
             "get": {
                 "description": "Get Exercise by id from param",
                 "consumes": [
@@ -216,7 +216,7 @@ const docTemplate = `{
                     {
                         "type": "integer",
                         "description": "Exercise ID",
-                        "name": "exerciseID",
+                        "name": "id",
                         "in": "path",
                         "required": true
                     }
@@ -482,6 +482,38 @@ const docTemplate = `{
                             "items": {
                                 "$ref": "#/definitions/store.Workout"
                             }
+                        }
+                    }
+                }
+            }
+        },
+        "/workouts/{workoutID}": {
+            "get": {
+                "description": "Get workout by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "workouts"
+                ],
+                "summary": "Get workout by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Workout ID",
+                        "name": "workoutID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/store.Workout"
                         }
                     }
                 }

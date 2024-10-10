@@ -283,7 +283,7 @@ paths:
       summary: Create a new Exercise
       tags:
       - exercises
-  /exercises/{exerciseID}:
+  /exercises/{id}:
     get:
       consumes:
       - application/json
@@ -291,7 +291,7 @@ paths:
       parameters:
       - description: Exercise ID
         in: path
-        name: exerciseID
+        name: id
         required: true
         type: integer
       produces:
@@ -462,6 +462,27 @@ paths:
               $ref: '#/definitions/store.Workout'
             type: array
       summary: Get all workouts
+      tags:
+      - workouts
+  /workouts/{workoutID}:
+    get:
+      consumes:
+      - application/json
+      description: Get workout by ID
+      parameters:
+      - description: Workout ID
+        in: path
+        name: workoutID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/store.Workout'
+      summary: Get workout by ID
       tags:
       - workouts
 securityDefinitions:

@@ -1,23 +1,27 @@
 package handlers
 
 import (
+	"errors"
 	"net/http"
+	"strconv"
+
+	"github.com/go-chi/chi/v5"
 
 	"github.com/stanislavCasciuc/atom-fit/api/response"
 	"github.com/stanislavCasciuc/atom-fit/internal/lib/mailer/pagination"
 	"github.com/stanislavCasciuc/atom-fit/internal/store"
 )
 
-//	@CreateWorkout	godoc
-//	@Summary		Create a new workout
-//	@Description	Create a new workout
-//	@Tags			workouts
-//	@Accept			json
-//	@Produce		json
-//	@Param			payload	body	store.Workout	true	"Create Workout Payload"
-//	@Success		204		"No Content"
-//	@Security		ApiKeyAuth
-//	@Router			/workouts [post]
+// @CreateWorkout	godoc
+// @Summary		Create a new workout
+// @Description	Create a new workout
+// @Tags			workouts
+// @Accept			json
+// @Produce		json
+// @Param			payload	body	store.Workout	true	"Create Workout Payload"
+// @Success		204		"No Content"
+// @Security		ApiKeyAuth
+// @Router			/workouts [post]
 func (h *Handlers) CreateWorkoutHandler(w http.ResponseWriter, r *http.Request) {
 	u := h.GetUserFromCtx(r)
 
@@ -42,18 +46,18 @@ func (h *Handlers) CreateWorkoutHandler(w http.ResponseWriter, r *http.Request) 
 	w.WriteHeader(http.StatusNoContent)
 }
 
-//	@GetAllWorkouts	godoc
-//	@Summary		Get all workouts
-//	@Description	Get all workouts
-//	@Tags			workouts
-//	@Accept			json
-//	@Produce		json
-//	@Param			limit	query		int		false	"Limit"
-//	@Param			offset	query		int		false	"Offset"
-//	@Param			sort	query		string	false	"Sort"
-//	@Param			search	query		string	false	"Search"
-//	@Success		200		{object}	[]store.Workout
-//	@Router			/workouts/ [get]
+// @GetAllWorkouts	godoc
+// @Summary		Get all workouts
+// @Description	Get all workouts
+// @Tags			workouts
+// @Accept			json
+// @Produce		json
+// @Param			limit	query		int		false	"Limit"
+// @Param			offset	query		int		false	"Offset"
+// @Param			sort	query		string	false	"Sort"
+// @Param			search	query		string	false	"Search"
+// @Success		200		{object}	[]store.Workout
+// @Router			/workouts/ [get]
 func (h *Handlers) GetAllWorkouts(w http.ResponseWriter, r *http.Request) {
 	fq := pagination.PaginatedQuery{
 		Limit:  20,
@@ -79,6 +83,52 @@ func (h *Handlers) GetAllWorkouts(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := response.WriteJSON(w, http.StatusOK, workouts); err != nil {
+		h.resp.InternalServerError(w, r, err)
+		return
+	}
+}
+
+// @GetWorkout		godoc
+// @Summary		Get workout by ID
+// @Description	Get workout by ID
+// @Tags			workouts
+// @Accept			json
+// @Produce		json
+// @Param			workoutID	path		int	true	"Workout ID"
+// @Success		200			{object}	store.Workout
+// @Router			/workouts/{workoutID} [get]
+func (h *Handlers) GetWorkout(w http.ResponseWriter, r *http.Request) {
+	workoutID := chi.URLParam(r, "workoutID")
+	if workoutID == "" {
+		h.resp.BadRequestError(w, r, errors.New("missing workoutID"))
+		return
+	}
+	id, err := strconv.ParseInt(workoutID, 10, 64)
+	if err != nil {
+		h.resp.InternalServerError(w, r, err)
+		return
+	}
+
+	ctx := r.Context()
+	workout, err := h.store.Workouts.GetByID(ctx, id)
+	if err != nil {
+		h.resp.InternalServerError(w, r, err)
+		return
+	}
+	if workout == nil {
+		h.resp.NotFoundErorr(w, r, errors.New("resource not found"))
+		return
+	}
+
+	we, err := h.store.Workouts.GetWorkoutExercises(ctx, id)
+	if err != nil {
+		h.resp.InternalServerError(w, r, err)
+		return
+	}
+
+	workout.WorkoutExercises = we
+
+	if err := response.WriteJSON(w, http.StatusOK, workout); err != nil {
 		h.resp.InternalServerError(w, r, err)
 		return
 	}

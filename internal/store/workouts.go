@@ -31,33 +31,19 @@ type WorkoutStore struct {
 	db *sql.DB
 }
 
-// func (s *WorkoutStore) GetWorkoutByID(ctx context.Context, id int64) (*Workout, err) {
-// 	query := `
-//     SELECT w.id, w.user_id, w.name, w.description, w.tutorial_link, w.created_at, e.id, e.name, e.is_duration, we.duraion, e.description, e.tutorial_link, e.muscles
-//     FROM workouts w
-//     LEFT JOIN workout_exercises we ON we.workout_id = w.id
-//     JOIN exercise e ON we.exercise_id = e.id
-//     WHERE w.id = 1
-//     GROUP BY w.id
-//   `
-// 	w := &Workout{}
-//
-// 	err := s.db.QueryRowContext(ctx, query, id).
-// 		Scan(&w.ID, &w.UserID, &w.Name, &w.Description, &w.TutorialLink, &w.CreatedAt, &w.WorkoutExercises.Exercise)
-// }
-
 func (s *WorkoutStore) GetAll(
 	ctx context.Context,
 	fq pagination.PaginatedQuery,
 ) ([]Workout, error) {
 	query := `
-	SELECT w.id, w.user_id, w.name, w.description, w.tutorial_link, w.created_at FROM workouts w 
+	SELECT w.id, w.user_id, w.name, w.description, w.tutorial_link, w.created_at 
+	FROM workouts w 
 	LEFT JOIN workout_exercises we ON we.workout_id = w.id 
 	JOIN exercises e ON we.exercise_id = e.id 
-    WHERE (e.name ILIKE '%' || $1 || '%' OR e.description ILIKE '%' || $1 || '%' OR w.name ILIKE '%' || $1 || '%' OR w.description ILIKE '%' || $1 || '%') AND 
+  WHERE (e.name ILIKE '%' || $1 || '%' OR e.description ILIKE '%' || $1 || '%' OR w.name ILIKE '%' || $1 || '%' OR w.description ILIKE '%' || $1 || '%') AND 
 (e.muscles @> $2 OR $2 = '{}')
-    ORDER BY w.created_at ` + fq.Sort + `
-    LIMIT $3 OFFSET $4
+  ORDER BY w.created_at ` + fq.Sort + `
+  LIMIT $3 OFFSET $4
   `
 	workouts := make([]Workout, 0)
 
@@ -96,6 +82,66 @@ func (s *WorkoutStore) Create(ctx context.Context, w *Workout) error {
 		}
 		return nil
 	})
+}
+
+func (s *WorkoutStore) GetByID(ctx context.Context, id int64) (*Workout, error) {
+	query := `
+		SELECT id, user_id, name, description, tutorial_link, created_at FROM workouts 
+		WHERE id = $1
+	`
+	w := &Workout{}
+	err := s.db.QueryRowContext(ctx, query, id).
+		Scan(&w.ID, &w.UserID, &w.Name, &w.Description, &w.TutorialLink, &w.CreatedAt)
+	if err != nil {
+		return nil, err
+	}
+
+	return w, nil
+}
+
+func (s *WorkoutStore) GetWorkoutExercises(
+	ctx context.Context,
+	workoutID int64,
+) ([]WorkoutExercises, error) {
+	query := `
+		SELECT id, user_id, name, description, is_duration, e.duration, tutorial_link, created_at, muscles, we.duration FROM exercises e 
+		JOIN workout_exercises we ON e.id = we.exercise_id
+		WHERE we.workout_id = $1
+	`
+	workoutExercises := make([]WorkoutExercises, 0)
+	rows, err := s.db.QueryContext(ctx, query, workoutID)
+	if err != nil {
+		return nil, err
+	}
+	for rows.Next() {
+		var e Exercise
+		var duration int
+		err := rows.Scan(
+			&e.ID,
+			&e.UserID,
+			&e.Name,
+			&e.Description,
+			&e.IsDuration,
+			&e.Duration,
+			&e.TutorialLink,
+			&e.CreatedAt,
+			pq.Array(&e.Muscles),
+			&duration,
+		)
+		if err != nil {
+			return nil, err
+		}
+		we := WorkoutExercises{
+			ExerciseID: e.ID,
+			Exercise:   e,
+			WorkoutID:  workoutID,
+			Duration:   duration,
+		}
+
+		workoutExercises = append(workoutExercises, we)
+	}
+
+	return workoutExercises, nil
 }
 
 func (s *WorkoutStore) createWorkout(ctx context.Context, tx *sql.Tx, w *Workout) error {
