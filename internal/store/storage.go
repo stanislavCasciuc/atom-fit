@@ -31,6 +31,10 @@ type Storage struct {
 		GetByID(context.Context, int64) (*Exercise, error)
 		GetAll(context.Context, pagination.PaginatedQuery) ([]Exercise, error)
 	}
+	ExercisesLikes interface {
+		Create(context.Context, int64, int64) error
+		Delete(context.Context, int64, int64) error
+	}
 	Workouts interface {
 		Create(context.Context, *Workout) error
 		GetAll(context.Context, pagination.PaginatedQuery) ([]Workout, error)
@@ -41,9 +45,10 @@ type Storage struct {
 
 func New(db *sql.DB) Storage {
 	return Storage{
-		Users:     &UserStore{db},
-		Exercises: &ExerciseStore{db},
-		Workouts:  &WorkoutStore{db},
+		Users:          &UserStore{db},
+		Exercises:      &ExerciseStore{db},
+		ExercisesLikes: &ExercisesLikesStore{db},
+		Workouts:       &WorkoutStore{db},
 	}
 }
 

@@ -86,6 +86,11 @@ definitions:
     - password
     - username
     type: object
+  response.SuccessResponse:
+    properties:
+      status:
+        type: string
+    type: object
   store.Exercise:
     properties:
       created_at:
@@ -240,6 +245,35 @@ paths:
       summary: Register a new
       tags:
       - auth
+  /exercise/{exerciseID}/unlike:
+    post:
+      consumes:
+      - application/json
+      description: Unlike exercise
+      parameters:
+      - description: Exercise ID
+        in: path
+        name: exerciseID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema: {}
+        "500":
+          description: Internal Server Error
+          schema: {}
+      security:
+      - ApiKeyAuth: []
+      summary: Unlike exercise
+      tags:
+      - likes
   /exercises:
     get:
       consumes:
@@ -309,6 +343,35 @@ paths:
       summary: Create a new Exercise
       tags:
       - exercises
+  /exercises/{exerciseID}/like:
+    post:
+      consumes:
+      - application/json
+      description: Like exercise
+      parameters:
+      - description: Exercise ID
+        in: path
+        name: exerciseID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema: {}
+        "500":
+          description: Internal Server Error
+          schema: {}
+      security:
+      - ApiKeyAuth: []
+      summary: Like exercise
+      tags:
+      - likes
   /exercises/{id}:
     get:
       consumes:

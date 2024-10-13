@@ -89,8 +89,6 @@ func (a *Application) Mount() http.Handler {
 				r.Post("/login", h.LoginHandler)
 			})
 			r.Route("/users", func(r chi.Router) {
-				r.Put("/activate", h.ActivateUser)
-				r.With(m.AuthTokenMiddleware).Get("/", h.GetUserHandler)
 				r.Route("/attributes", func(r chi.Router) {
 					r.Use(m.AuthTokenMiddleware)
 					r.Get("/", h.GetUserWithAttrHandler)
@@ -102,6 +100,8 @@ func (a *Application) Mount() http.Handler {
 				r.With(m.AuthTokenMiddleware).Post("/", h.CreateExerciseHandler)
 				r.Get("/{exerciseID}", h.GetExerciseHandler)
 				r.Get("/", h.GetAllExercisesHandler)
+				r.With(m.AuthTokenMiddleware).Post("/{exerciseID}/like", h.LikeExerciseHandler)
+				r.With(m.AuthTokenMiddleware).Post("/{exerciseID}/unlike", h.UnLikeExerciseHandler)
 			})
 			r.Route("/workouts", func(r chi.Router) {
 				r.Get("/{workoutID}", h.GetWorkout)
