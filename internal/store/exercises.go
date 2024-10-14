@@ -21,6 +21,7 @@ type Exercise struct {
 	TutorialLink string   `json:"tutorial_link"`
 	CreatedAt    string   `json:"created_at"`
 	Muscles      []string `json:"muscles"`
+	Likes        int      `json:"like"`
 }
 
 type ExerciseStore struct {
@@ -32,11 +33,13 @@ func (s *ExerciseStore) GetAll(
 	fq pagination.PaginatedQuery,
 ) ([]Exercise, error) {
 	query := `
-		SELECT id, user_id, name, description, is_duration, duration, tutorial_link, created_at, muscles 
+		SELECT id, exercises.user_id, name, description, is_duration, duration, tutorial_link, created_at, muscles, COUNT(DISTINCT el.user_id) as likes
     FROM exercises 
+		LEFT JOIN exercise_likes el ON exercises.id = el.exercise_id
     WHERE (name ILIKE '%' || $1 || '%' OR description ILIKE '%' || $1 || '%') AND 
 (muscles @> $2 OR $2 = '{}')
-    ORDER BY created_at ` + fq.Sort + `
+		GROUP BY id
+    ORDER BY likes ` + fq.Sort + `
     LIMIT $3 OFFSET $4
 	`
 
@@ -63,6 +66,7 @@ func (s *ExerciseStore) GetAll(
 			&e.TutorialLink,
 			&e.CreatedAt,
 			pq.Array(&e.Muscles),
+			&e.Likes,
 		)
 		if err != nil {
 			return nil, err

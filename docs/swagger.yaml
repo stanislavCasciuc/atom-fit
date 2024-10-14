@@ -103,6 +103,8 @@ definitions:
         type: integer
       is_duration:
         type: boolean
+      like:
+        type: integer
       muscles:
         items:
           type: string
@@ -166,6 +168,8 @@ definitions:
       description:
         type: string
       id:
+        type: integer
+      likes:
         type: integer
       name:
         type: string
@@ -578,6 +582,64 @@ paths:
       summary: Get workout by ID
       tags:
       - workouts
+  /workouts/{workoutID}/like:
+    post:
+      consumes:
+      - application/json
+      description: Like exercise
+      parameters:
+      - description: Workout ID
+        in: path
+        name: workoutID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema: {}
+        "500":
+          description: Internal Server Error
+          schema: {}
+      security:
+      - ApiKeyAuth: []
+      summary: Like exercise
+      tags:
+      - likes
+  /workouts/{workoutID}/unlike:
+    post:
+      consumes:
+      - application/json
+      description: Unlike Workout
+      parameters:
+      - description: Workout ID
+        in: path
+        name: workoutID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema: {}
+        "500":
+          description: Internal Server Error
+          schema: {}
+      security:
+      - ApiKeyAuth: []
+      summary: Unlike Workout
+      tags:
+      - likes
 securityDefinitions:
   ApiKeyAuth:
     in: header

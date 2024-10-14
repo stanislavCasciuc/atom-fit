@@ -31,24 +31,26 @@ type Storage struct {
 		GetByID(context.Context, int64) (*Exercise, error)
 		GetAll(context.Context, pagination.PaginatedQuery) ([]Exercise, error)
 	}
-	ExercisesLikes interface {
-		Create(context.Context, int64, int64) error
-		Delete(context.Context, int64, int64) error
-	}
 	Workouts interface {
 		Create(context.Context, *Workout) error
 		GetAll(context.Context, pagination.PaginatedQuery) ([]Workout, error)
 		GetByID(context.Context, int64) (*Workout, error)
 		GetWorkoutExercises(context.Context, int64) ([]WorkoutExercises, error)
 	}
+	Likes interface {
+		CreateExercise(context.Context, int64, int64) error
+		DeleteExercise(context.Context, int64, int64) error
+		CreateWorkout(context.Context, int64, int64) error
+		DeleteWorkout(context.Context, int64, int64) error
+	}
 }
 
 func New(db *sql.DB) Storage {
 	return Storage{
-		Users:          &UserStore{db},
-		Exercises:      &ExerciseStore{db},
-		ExercisesLikes: &ExercisesLikesStore{db},
-		Workouts:       &WorkoutStore{db},
+		Users:     &UserStore{db},
+		Exercises: &ExerciseStore{db},
+		Likes:     &LikesStore{db},
+		Workouts:  &WorkoutStore{db},
 	}
 }
 

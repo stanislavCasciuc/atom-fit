@@ -614,6 +614,96 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/workouts/{workoutID}/like": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Like exercise",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "likes"
+                ],
+                "summary": "Like exercise",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Workout ID",
+                        "name": "workoutID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.SuccessResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/workouts/{workoutID}/unlike": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Unlike Workout",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "likes"
+                ],
+                "summary": "Unlike Workout",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Workout ID",
+                        "name": "workoutID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.SuccessResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {}
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -769,6 +859,9 @@ const docTemplate = `{
                 "is_duration": {
                     "type": "boolean"
                 },
+                "like": {
+                    "type": "integer"
+                },
                 "muscles": {
                     "type": "array",
                     "items": {
@@ -864,6 +957,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "id": {
+                    "type": "integer"
+                },
+                "likes": {
                     "type": "integer"
                 },
                 "name": {
