@@ -92,8 +92,8 @@ const docTemplate = `{
                 }
             }
         },
-        "/exercise/{exerciseID}/unlike": {
-            "post": {
+        "/exercise/{exerciseID}/like": {
+            "delete": {
                 "security": [
                     {
                         "ApiKeyAuth": []
@@ -317,6 +317,84 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/store.Exercise"
                         }
+                    }
+                }
+            }
+        },
+        "/nutrients/daily-goal": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get macronutrients goal per day for the user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "nutrients"
+                ],
+                "summary": "Get macronutrients goal per day",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/nutrients.UserNutrientsGoal"
+                        }
+                    }
+                }
+            }
+        },
+        "/reviews/workout/{workoutID}": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Review workout",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "reviews"
+                ],
+                "summary": "Review workout",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Workout ID",
+                        "name": "workoutID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Review workout payload",
+                        "name": "payload",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handlers.WorkoutReviewPayload"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/store.WorkoutReview"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
                     }
                 }
             }
@@ -658,10 +736,8 @@ const docTemplate = `{
                         "schema": {}
                     }
                 }
-            }
-        },
-        "/workouts/{workoutID}/unlike": {
-            "post": {
+            },
+            "delete": {
                 "security": [
                     {
                         "ApiKeyAuth": []
@@ -784,6 +860,33 @@ const docTemplate = `{
                 }
             }
         },
+        "handlers.WorkoutReviewPayload": {
+            "type": "object",
+            "required": [
+                "content",
+                "rating",
+                "title"
+            ],
+            "properties": {
+                "content": {
+                    "type": "string"
+                },
+                "rating": {
+                    "type": "integer",
+                    "enum": [
+                        1,
+                        2,
+                        3,
+                        4,
+                        5
+                    ]
+                },
+                "title": {
+                    "type": "string",
+                    "maxLength": 255
+                }
+            }
+        },
         "handlers.registerUserPayload": {
             "type": "object",
             "required": [
@@ -829,6 +932,23 @@ const docTemplate = `{
                     "type": "number"
                 },
                 "weight_goal": {
+                    "type": "number"
+                }
+            }
+        },
+        "nutrients.UserNutrientsGoal": {
+            "type": "object",
+            "properties": {
+                "calories": {
+                    "type": "number"
+                },
+                "carbohydrats": {
+                    "type": "number"
+                },
+                "fats": {
+                    "type": "number"
+                },
+                "proteins": {
                     "type": "number"
                 }
             }
@@ -989,6 +1109,32 @@ const docTemplate = `{
                     "$ref": "#/definitions/store.Exercise"
                 },
                 "exercise_id": {
+                    "type": "integer"
+                },
+                "workout_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "store.WorkoutReview": {
+            "type": "object",
+            "properties": {
+                "content": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "rating": {
+                    "type": "integer"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "user_id": {
                     "type": "integer"
                 },
                 "workout_id": {

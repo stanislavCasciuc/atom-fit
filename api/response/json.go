@@ -13,6 +13,16 @@ func init() {
 	Validate = validator.New(validator.WithRequiredStructEnabled())
 }
 
+func (resp *Responser) ReadAndValidateJSON(w http.ResponseWriter, r *http.Request, data any) error {
+	if err := ReadJSON(w, r, &data); err != nil {
+		return err
+	}
+	if err := Validate.Struct(data); err != nil {
+		return err
+	}
+	return nil
+}
+
 func WriteJSON(w http.ResponseWriter, status int, data any) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)

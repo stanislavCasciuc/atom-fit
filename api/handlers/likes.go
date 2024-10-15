@@ -64,7 +64,7 @@ func (h *Handlers) LikeExerciseHandler(w http.ResponseWriter, r *http.Request) {
 // @Failure		400			{object}	error
 // @Failure		500			{object}	error
 // @Security		ApiKeyAuth
-// @Router			/exercise/{exerciseID}/unlike [post]
+// @Router			/exercise/{exerciseID}/like [delete]
 func (h *Handlers) UnlikeExerciseHandler(w http.ResponseWriter, r *http.Request) {
 	u := h.GetUserFromCtx(r)
 	idString := chi.URLParam(r, "exerciseID")
@@ -135,7 +135,7 @@ func (h *Handlers) LikeWorkoutHandler(w http.ResponseWriter, r *http.Request) {
 // @Failure		400			{object}	error
 // @Failure		500			{object}	error
 // @Security		ApiKeyAuth
-// @Router			/workouts/{workoutID}/unlike [post]
+// @Router			/workouts/{workoutID}/like [delete]
 func (h *Handlers) UnlikeWorkoutHandler(w http.ResponseWriter, r *http.Request) {
 	u := h.GetUserFromCtx(r)
 	idString := chi.URLParam(r, "workoutID")

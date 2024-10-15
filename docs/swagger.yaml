@@ -50,6 +50,26 @@ definitions:
       token:
         type: string
     type: object
+  handlers.WorkoutReviewPayload:
+    properties:
+      content:
+        type: string
+      rating:
+        enum:
+        - 1
+        - 2
+        - 3
+        - 4
+        - 5
+        type: integer
+      title:
+        maxLength: 255
+        type: string
+    required:
+    - content
+    - rating
+    - title
+    type: object
   handlers.registerUserPayload:
     properties:
       age:
@@ -85,6 +105,17 @@ definitions:
     - is_male
     - password
     - username
+    type: object
+  nutrients.UserNutrientsGoal:
+    properties:
+      calories:
+        type: number
+      carbohydrats:
+        type: number
+      fats:
+        type: number
+      proteins:
+        type: number
     type: object
   response.SuccessResponse:
     properties:
@@ -193,6 +224,23 @@ definitions:
       workout_id:
         type: integer
     type: object
+  store.WorkoutReview:
+    properties:
+      content:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: integer
+      rating:
+        type: integer
+      title:
+        type: string
+      user_id:
+        type: integer
+      workout_id:
+        type: integer
+    type: object
 info:
   contact:
     email: support@swagger.io
@@ -249,8 +297,8 @@ paths:
       summary: Register a new
       tags:
       - auth
-  /exercise/{exerciseID}/unlike:
-    post:
+  /exercise/{exerciseID}/like:
+    delete:
       consumes:
       - application/json
       description: Unlike exercise
@@ -397,6 +445,55 @@ paths:
       summary: Get Exercise by id from param
       tags:
       - exercises
+  /nutrients/daily-goal:
+    get:
+      consumes:
+      - application/json
+      description: Get macronutrients goal per day for the user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/nutrients.UserNutrientsGoal'
+      security:
+      - ApiKeyAuth: []
+      summary: Get macronutrients goal per day
+      tags:
+      - nutrients
+  /reviews/workout/{workoutID}:
+    post:
+      consumes:
+      - application/json
+      description: Review workout
+      parameters:
+      - description: Workout ID
+        in: path
+        name: workoutID
+        required: true
+        type: integer
+      - description: Review workout payload
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.WorkoutReviewPayload'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/store.WorkoutReview'
+        "400":
+          description: Bad Request
+          schema: {}
+      security:
+      - ApiKeyAuth: []
+      summary: Review workout
+      tags:
+      - reviews
   /users:
     get:
       consumes:
@@ -583,6 +680,34 @@ paths:
       tags:
       - workouts
   /workouts/{workoutID}/like:
+    delete:
+      consumes:
+      - application/json
+      description: Unlike Workout
+      parameters:
+      - description: Workout ID
+        in: path
+        name: workoutID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema: {}
+        "500":
+          description: Internal Server Error
+          schema: {}
+      security:
+      - ApiKeyAuth: []
+      summary: Unlike Workout
+      tags:
+      - likes
     post:
       consumes:
       - application/json
@@ -609,35 +734,6 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Like exercise
-      tags:
-      - likes
-  /workouts/{workoutID}/unlike:
-    post:
-      consumes:
-      - application/json
-      description: Unlike Workout
-      parameters:
-      - description: Workout ID
-        in: path
-        name: workoutID
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/response.SuccessResponse'
-        "400":
-          description: Bad Request
-          schema: {}
-        "500":
-          description: Internal Server Error
-          schema: {}
-      security:
-      - ApiKeyAuth: []
-      summary: Unlike Workout
       tags:
       - likes
 securityDefinitions:

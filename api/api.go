@@ -101,14 +101,22 @@ func (a *Application) Mount() http.Handler {
 				r.Get("/{exerciseID}", h.GetExerciseHandler)
 				r.Get("/", h.GetAllExercisesHandler)
 				r.With(m.AuthTokenMiddleware).Post("/{exerciseID}/like", h.LikeExerciseHandler)
-				r.With(m.AuthTokenMiddleware).Post("/{exerciseID}/unlike", h.UnlikeExerciseHandler)
+				r.With(m.AuthTokenMiddleware).
+					Delete("/{exerciseID}/like", h.UnlikeExerciseHandler)
 			})
 			r.Route("/workouts", func(r chi.Router) {
 				r.Get("/{workoutID}", h.GetWorkout)
 				r.With(m.AuthTokenMiddleware).Post("/", h.CreateWorkoutHandler)
 				r.Get("/", h.GetAllWorkouts)
 				r.With(m.AuthTokenMiddleware).Post("/{workoutID}/like", h.LikeWorkoutHandler)
-				r.With(m.AuthTokenMiddleware).Post("/{workoutID}/unlike", h.UnlikeWorkoutHandler)
+				r.With(m.AuthTokenMiddleware).Delete("/{workoutID}/like", h.UnlikeWorkoutHandler)
+			})
+			r.Route("/reviews", func(r chi.Router) {
+				r.With(m.AuthTokenMiddleware).Post("/workout/{workoutID}", h.ReviewWorkoutHandler)
+			})
+			r.Route("/nutrients", func(r chi.Router) {
+				r.With(m.AuthTokenMiddleware).
+					Get("/daily-goal", h.GetMacronutrientsGoalPerDayHandler)
 			})
 		})
 	})

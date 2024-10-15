@@ -43,6 +43,9 @@ type Storage struct {
 		CreateWorkout(context.Context, int64, int64) error
 		DeleteWorkout(context.Context, int64, int64) error
 	}
+	Reviews interface {
+		CreateWorkout(context.Context, *WorkoutReview) error
+	}
 }
 
 func New(db *sql.DB) Storage {
@@ -51,6 +54,7 @@ func New(db *sql.DB) Storage {
 		Exercises: &ExerciseStore{db},
 		Likes:     &LikesStore{db},
 		Workouts:  &WorkoutStore{db},
+		Reviews:   &ReviewsStore{db},
 	}
 }
 
