@@ -19,6 +19,8 @@ type Workout struct {
 	CreatedAt        string             `json:"created_at"`
 	WorkoutExercises []WorkoutExercises `json:"workout_exercises"`
 	Likes            int                `json:"likes"`
+	Rating           float32            `json:"rating"`
+	ReviewsCount     int                `json:"reviews_count"`
 }
 
 type WorkoutExercises struct {
@@ -37,11 +39,12 @@ func (s *WorkoutStore) GetAll(
 	fq pagination.PaginatedQuery,
 ) ([]Workout, error) {
 	query := `
-	SELECT w.id, w.user_id, w.name, w.description, w.tutorial_link, w.created_at, COUNT(DISTINCT wl.user_id) as likes
+	SELECT w.id, w.user_id, w.name, w.description, w.tutorial_link, w.created_at, COUNT(DISTINCT wl.user_id) as likes, COUNT(DISTINCT wr.user_id) as reviews_count, COALESCE(AVG(wr.rating), 0.0) AS average_rating
 	FROM workouts w 
 	LEFT JOIN workout_exercises we ON we.workout_id = w.id 
  LEFT	JOIN exercises e ON we.exercise_id = e.id 
 	LEFT JOIN workout_likes wl ON w.id = wl.workout_id
+  LEFT JOIN workout_reviews wr ON w.id = wr.workout_id
   WHERE (e.name ILIKE '%' || $1 || '%' OR e.description ILIKE '%' || $1 || '%' OR w.name ILIKE '%' || $1 || '%' OR w.description ILIKE '%' || $1 || '%') AND 
 (e.muscles @> $2 OR $2 = '{}')
 	GROUP BY  w.id
@@ -66,6 +69,8 @@ func (s *WorkoutStore) GetAll(
 			&w.TutorialLink,
 			&w.CreatedAt,
 			&w.Likes,
+			&w.ReviewsCount,
+			&w.Rating,
 		)
 		if err != nil {
 			return nil, err

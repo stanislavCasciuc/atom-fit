@@ -204,6 +204,10 @@ definitions:
         type: integer
       name:
         type: string
+      rating:
+        type: number
+      reviews_count:
+        type: integer
       tutorial_link:
         type: string
       user_id:
@@ -230,14 +234,29 @@ definitions:
         type: string
       created_at:
         type: string
-      id:
-        type: integer
       rating:
         type: integer
       title:
         type: string
       user_id:
         type: integer
+      workout_id:
+        type: integer
+    type: object
+  store.WorkoutReviewWithMetadata:
+    properties:
+      content:
+        type: string
+      created_at:
+        type: string
+      rating:
+        type: integer
+      title:
+        type: string
+      user_id:
+        type: integer
+      username:
+        type: string
       workout_id:
         type: integer
     type: object
@@ -463,6 +482,31 @@ paths:
       tags:
       - nutrients
   /reviews/workout/{workoutID}:
+    get:
+      consumes:
+      - application/json
+      description: Get workout reviews
+      parameters:
+      - description: Workout ID
+        in: path
+        name: workoutID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/store.WorkoutReviewWithMetadata'
+            type: array
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: Get workout reviews
+      tags:
+      - reviews
     post:
       consumes:
       - application/json

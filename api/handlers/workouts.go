@@ -122,7 +122,7 @@ func (h *Handlers) GetAllWorkouts(w http.ResponseWriter, r *http.Request) {
 // @Param			workoutID	path		int	true	"Workout ID"
 // @Success		200			{object}	store.Workout
 // @Router			/workouts/{workoutID} [get]
-func (h *Handlers) GetWorkout(w http.ResponseWriter, r *http.Request) {
+func (h *Handlers) GetWorkoutHandler(w http.ResponseWriter, r *http.Request) {
 	workoutID := chi.URLParam(r, "workoutID")
 	if workoutID == "" {
 		h.resp.BadRequestError(w, r, errors.New("missing workoutID"))

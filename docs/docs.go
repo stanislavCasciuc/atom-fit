@@ -350,6 +350,43 @@ const docTemplate = `{
             }
         },
         "/reviews/workout/{workoutID}": {
+            "get": {
+                "description": "Get workout reviews",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "reviews"
+                ],
+                "summary": "Get workout reviews",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Workout ID",
+                        "name": "workoutID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/store.WorkoutReviewWithMetadata"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    }
+                }
+            },
             "post": {
                 "security": [
                     {
@@ -1085,6 +1122,12 @@ const docTemplate = `{
                 "name": {
                     "type": "string"
                 },
+                "rating": {
+                    "type": "number"
+                },
+                "reviews_count": {
+                    "type": "integer"
+                },
                 "tutorial_link": {
                     "type": "string"
                 },
@@ -1125,8 +1168,28 @@ const docTemplate = `{
                 "created_at": {
                     "type": "string"
                 },
-                "id": {
+                "rating": {
                     "type": "integer"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "integer"
+                },
+                "workout_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "store.WorkoutReviewWithMetadata": {
+            "type": "object",
+            "properties": {
+                "content": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
                 },
                 "rating": {
                     "type": "integer"
@@ -1136,6 +1199,9 @@ const docTemplate = `{
                 },
                 "user_id": {
                     "type": "integer"
+                },
+                "username": {
+                    "type": "string"
                 },
                 "workout_id": {
                     "type": "integer"

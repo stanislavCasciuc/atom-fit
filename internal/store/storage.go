@@ -45,6 +45,7 @@ type Storage struct {
 	}
 	Reviews interface {
 		CreateWorkout(context.Context, *WorkoutReview) error
+		Get(context.Context, int64) ([]WorkoutReviewWithMetadata, error)
 	}
 }
 

@@ -60,3 +60,33 @@ func (h *Handlers) ReviewWorkoutHandler(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 }
+
+// @GetWorkoutReviews	godoc
+// @Summary			Get workout reviews
+// @Description		Get workout reviews
+// @Tags				reviews
+// @Accept				json
+// @Produce			json
+// @Param				workoutID	path		int	true	"Workout ID"
+// @Success			200			{object}	[]store.WorkoutReviewWithMetadata
+// @Failure			400			{object}	error
+// @Router				/reviews/workout/{workoutID} [get]
+func (h *Handlers) GetWorkoutReviewsHandler(w http.ResponseWriter, r *http.Request) {
+	idString := chi.URLParam(r, "workoutID")
+	workoutID, err := strconv.ParseInt(idString, 10, 64)
+	if err != nil {
+		h.resp.BadRequestError(w, r, err)
+		return
+	}
+
+	wr, err := h.store.Reviews.Get(r.Context(), workoutID)
+	if err != nil {
+		h.resp.InternalServerError(w, r, err)
+		return
+	}
+
+	if err := response.WriteJSON(w, http.StatusOK, wr); err != nil {
+		h.resp.InternalServerError(w, r, err)
+		return
+	}
+}
