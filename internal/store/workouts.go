@@ -21,6 +21,7 @@ type Workout struct {
 	Likes            int                `json:"likes"`
 	Rating           float32            `json:"rating"`
 	ReviewsCount     int                `json:"reviews_count"`
+	UserLiked        bool               `json:"user_liked"`
 }
 
 type WorkoutExercises struct {
@@ -37,27 +38,58 @@ type WorkoutStore struct {
 func (s *WorkoutStore) GetAll(
 	ctx context.Context,
 	fq pagination.PaginatedQuery,
-) ([]Workout, error) {
+	userID int64,
+) ([]Workout, int, error) {
 	query := `
-	SELECT w.id, w.user_id, w.name, w.description, w.tutorial_link, w.created_at, COUNT(DISTINCT wl.user_id) as likes, COUNT(DISTINCT wr.user_id) as reviews_count, COALESCE(AVG(wr.rating), 0.0) AS average_rating
+	SELECT 
+	  w.id, 
+	  w.user_id, 
+	  w.name, 
+	  w.description, 
+	  w.tutorial_link, 
+	  w.created_at, 
+	  COUNT(DISTINCT wl.user_id) AS likes, 
+	  COUNT(DISTINCT wr.user_id) AS reviews_count, 
+	  COALESCE(AVG(wr.rating), 0.0) AS average_rating,
+	  CASE 
+	    WHEN EXISTS (
+	      SELECT 1 FROM workout_likes wl2 
+	      WHERE wl2.workout_id = w.id AND wl2.user_id = $5
+	    ) THEN true
+	    ELSE false 
+	  END AS user_liked ,
+    COUNT(*) OVER() AS total_count
 	FROM workouts w 
 	LEFT JOIN workout_exercises we ON we.workout_id = w.id 
- LEFT	JOIN exercises e ON we.exercise_id = e.id 
-	LEFT JOIN workout_likes wl ON w.id = wl.workout_id
-  LEFT JOIN workout_reviews wr ON w.id = wr.workout_id
-  WHERE (e.name ILIKE '%' || $1 || '%' OR e.description ILIKE '%' || $1 || '%' OR w.name ILIKE '%' || $1 || '%' OR w.description ILIKE '%' || $1 || '%') AND 
-(e.muscles @> $2 OR $2 = '{}')
-	GROUP BY  w.id
-  ORDER BY likes ` + fq.Sort + `
-  LIMIT $3 OFFSET $4
-  `
+	LEFT JOIN exercises e ON we.exercise_id = e.id 
+	LEFT JOIN workout_likes wl ON w.id = wl.workout_id 
+	LEFT JOIN workout_reviews wr ON w.id = wr.workout_id 
+	WHERE 
+	  (e.name ILIKE '%' || $1 || '%' 
+	  OR e.description ILIKE '%' || $1 || '%' 
+	  OR w.name ILIKE '%' || $1 || '%' 
+	  OR w.description ILIKE '%' || $1 || '%') 
+	  AND (e.muscles @> $2 OR $2 = '{}') 
+	GROUP BY w.id 
+	ORDER BY likes ` + fq.Sort + ` 
+	LIMIT $3 OFFSET $4
+`
+
 	workouts := make([]Workout, 0)
 
-	rows, err := s.db.QueryContext(ctx, query, fq.Search, pq.Array(fq.Tags), fq.Limit, fq.Offset)
+	rows, err := s.db.QueryContext(
+		ctx,
+		query,
+		fq.Search,
+		pq.Array(fq.Tags),
+		fq.Limit,
+		fq.Offset,
+		userID,
+	)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
-
+	var totalCount int
 	for rows.Next() {
 		var w Workout
 
@@ -71,14 +103,16 @@ func (s *WorkoutStore) GetAll(
 			&w.Likes,
 			&w.ReviewsCount,
 			&w.Rating,
+			&w.UserLiked,
+			&totalCount,
 		)
 		if err != nil {
-			return nil, err
+			return nil, 0, err
 		}
 
 		workouts = append(workouts, w)
 	}
-	return workouts, nil
+	return workouts, totalCount, nil
 }
 
 func (s *WorkoutStore) Create(ctx context.Context, w *Workout) error {

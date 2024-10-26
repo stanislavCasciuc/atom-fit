@@ -70,6 +70,11 @@ func (h *Handlers) CreateWorkoutHandler(w http.ResponseWriter, r *http.Request) 
 	}
 }
 
+type WorkoutsResponse struct {
+	Data       []store.Workout `json:"data"`
+	TotalCount int             `json:"total_count"`
+}
+
 // @GetAllWorkouts	godoc
 // @Summary		Get all workouts
 // @Description	Get all workouts
@@ -81,9 +86,11 @@ func (h *Handlers) CreateWorkoutHandler(w http.ResponseWriter, r *http.Request) 
 // @Param			sort	query		string	false	"Sort"
 // @Param			tags	query		string	false	"Tags"
 // @Param			search	query		string	false	"Search"
-// @Success		200		{object}	[]store.Workout
+// @Success		200		{object}	WorkoutsResponse
+// @Security		ApiKeyAuth
 // @Router			/workouts/ [get]
 func (h *Handlers) GetAllWorkouts(w http.ResponseWriter, r *http.Request) {
+	u := h.GetUserFromCtx(r)
 	fq := pagination.PaginatedQuery{
 		Limit:  20,
 		Offset: 0,
@@ -101,13 +108,17 @@ func (h *Handlers) GetAllWorkouts(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	workouts, err := h.store.Workouts.GetAll(r.Context(), fq)
+	workouts, totalCount, err := h.store.Workouts.GetAll(r.Context(), fq, u.ID)
 	if err != nil {
 		h.resp.InternalServerError(w, r, err)
 		return
 	}
 
-	if err := response.WriteJSON(w, http.StatusOK, workouts); err != nil {
+	resp := WorkoutsResponse{
+		Data:       workouts,
+		TotalCount: totalCount,
+	}
+	if err := response.WriteJSON(w, http.StatusOK, resp); err != nil {
 		h.resp.InternalServerError(w, r, err)
 		return
 	}

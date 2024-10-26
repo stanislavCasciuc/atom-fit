@@ -107,7 +107,7 @@ func (a *Application) Mount() http.Handler {
 			r.Route("/workouts", func(r chi.Router) {
 				r.Get("/{workoutID}", h.GetWorkoutHandler)
 				r.With(m.AuthTokenMiddleware).Post("/", h.CreateWorkoutHandler)
-				r.Get("/", h.GetAllWorkouts)
+				r.With(m.AuthTokenMiddleware).Get("/", h.GetAllWorkouts)
 				r.With(m.AuthTokenMiddleware).Post("/{workoutID}/like", h.LikeWorkoutHandler)
 				r.With(m.AuthTokenMiddleware).Delete("/{workoutID}/like", h.UnlikeWorkoutHandler)
 			})

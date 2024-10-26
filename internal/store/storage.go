@@ -33,7 +33,7 @@ type Storage struct {
 	}
 	Workouts interface {
 		Create(context.Context, *Workout) error
-		GetAll(context.Context, pagination.PaginatedQuery) ([]Workout, error)
+		GetAll(context.Context, pagination.PaginatedQuery, int64) ([]Workout, int, error)
 		GetByID(context.Context, int64) (*Workout, error)
 		GetWorkoutExercises(context.Context, int64) ([]WorkoutExercises, error)
 	}

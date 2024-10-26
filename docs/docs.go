@@ -642,6 +642,11 @@ const docTemplate = `{
         },
         "/workouts/": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Get all workouts",
                 "consumes": [
                     "application/json"
@@ -689,10 +694,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/store.Workout"
-                            }
+                            "$ref": "#/definitions/handlers.WorkoutsResponse"
                         }
                     }
                 }
@@ -924,6 +926,20 @@ const docTemplate = `{
                 }
             }
         },
+        "handlers.WorkoutsResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/store.Workout"
+                    }
+                },
+                "total_count": {
+                    "type": "integer"
+                }
+            }
+        },
         "handlers.registerUserPayload": {
             "type": "object",
             "required": [
@@ -1133,6 +1149,9 @@ const docTemplate = `{
                 },
                 "user_id": {
                     "type": "integer"
+                },
+                "user_liked": {
+                    "type": "boolean"
                 },
                 "workout_exercises": {
                     "type": "array",
