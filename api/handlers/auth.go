@@ -3,11 +3,13 @@ package handlers
 import (
 	"crypto/sha256"
 	"encoding/hex"
+	"fmt"
 	"net/http"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
+	"golang.org/x/crypto/bcrypt"
 
 	"github.com/stanislavCasciuc/atom-fit/api/response"
 	"github.com/stanislavCasciuc/atom-fit/internal/store"
@@ -136,6 +138,11 @@ func (h *Handlers) LoginHandler(w http.ResponseWriter, r *http.Request) {
 		default:
 			h.resp.InternalServerError(w, r, err)
 		}
+		return
+	}
+
+	if err := bcrypt.CompareHashAndPassword(u.Password.Hash, []byte(payload.Password)); err != nil {
+		h.resp.UnauthorizedError(w, r, fmt.Errorf("invalid password or email"))
 		return
 	}
 
