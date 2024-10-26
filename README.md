@@ -26,10 +26,9 @@ To install the project, follow these steps:
     ```
 4. Create a `.env` file in the root of the project with variables from main file:
 
-5. Install migration tool and swaggo:
+5. Install migration tool:
     ```sh
     go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
-    go intstall github.com/swaggo/swag/cmd/swag@latest
     ```
 6. Run the migration:
     ```sh
