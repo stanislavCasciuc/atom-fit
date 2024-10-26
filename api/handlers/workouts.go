@@ -23,16 +23,16 @@ type CreateWorkoutExercisePayload struct {
 	Duration   int   `json:"duration"    validate:"required"`
 }
 
-// @CreateWorkout	godoc
-// @Summary		Create a new workout
-// @Description	Create a new workout
-// @Tags			workouts
-// @Accept			json
-// @Produce		json
-// @Param			payload	body	CreateWorkoutPayload true	"Create Workout Payload"
-// @Success		204		"No Content"
-// @Security		ApiKeyAuth
-// @Router			/workouts [post]
+//	@CreateWorkout	godoc
+//	@Summary		Create a new workout
+//	@Description	Create a new workout
+//	@Tags			workouts
+//	@Accept			json
+//	@Produce		json
+//	@Param			payload	body	CreateWorkoutPayload	true	"Create Workout Payload"
+//	@Success		204		"No Content"
+//	@Security		ApiKeyAuth
+//	@Router			/workouts [post]
 func (h *Handlers) CreateWorkoutHandler(w http.ResponseWriter, r *http.Request) {
 	u := h.GetUserFromCtx(r)
 
@@ -75,20 +75,20 @@ type WorkoutsResponse struct {
 	TotalCount int             `json:"total_count"`
 }
 
-// @GetAllWorkouts	godoc
-// @Summary		Get all workouts
-// @Description	Get all workouts
-// @Tags			workouts
-// @Accept			json
-// @Produce		json
-// @Param			limit	query		int		false	"Limit"
-// @Param			offset	query		int		false	"Offset"
-// @Param			sort	query		string	false	"Sort"
-// @Param			tags	query		string	false	"Tags"
-// @Param			search	query		string	false	"Search"
-// @Success		200		{object}	WorkoutsResponse
-// @Security		ApiKeyAuth
-// @Router			/workouts/ [get]
+//	@GetAllWorkouts	godoc
+//	@Summary		Get all workouts
+//	@Description	Get all workouts
+//	@Tags			workouts
+//	@Accept			json
+//	@Produce		json
+//	@Param			limit	query		int		false	"Limit"
+//	@Param			offset	query		int		false	"Offset"
+//	@Param			sort	query		string	false	"Sort"
+//	@Param			tags	query		string	false	"Tags"
+//	@Param			search	query		string	false	"Search"
+//	@Success		200		{object}	WorkoutsResponse
+//	@Security		ApiKeyAuth
+//	@Router			/workouts/ [get]
 func (h *Handlers) GetAllWorkouts(w http.ResponseWriter, r *http.Request) {
 	u := h.GetUserFromCtx(r)
 	fq := pagination.PaginatedQuery{
@@ -124,15 +124,64 @@ func (h *Handlers) GetAllWorkouts(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// @GetWorkout		godoc
-// @Summary		Get workout by ID
-// @Description	Get workout by ID
-// @Tags			workouts
-// @Accept			json
-// @Produce		json
-// @Param			workoutID	path		int	true	"Workout ID"
-// @Success		200			{object}	store.Workout
-// @Router			/workouts/{workoutID} [get]
+//	@GetUserWorkouts	godoc
+//	@Summary			Get user workouts
+//	@Description		Get user workouts
+//	@Tags				workouts
+//	@Accept				json
+//	@Produce			json
+//	@Param				limit	query		int		false	"Limit"
+//	@Param				offset	query		int		false	"Offset"
+//	@Param				sort	query		string	false	"Sort"
+//	@Param				userID	path		int		false	"userID"
+//	@Success			200		{object}	[]store.Workout
+//	@Security			ApiKeyAuth
+//	@Router				/workouts/{userID} [get]
+func (h *Handlers) GetUserWorkouts(w http.ResponseWriter, r *http.Request) {
+	idString := chi.URLParam(r, "userID")
+	userID, err := strconv.ParseInt(idString, 10, 64)
+	if err != nil {
+		h.resp.BadRequestError(w, r, err)
+		return
+	}
+	fq := pagination.PaginatedQuery{
+		Limit:  20,
+		Offset: 0,
+		Sort:   "desc",
+	}
+
+	fq, err = fq.Parse(r)
+	if err != nil {
+		h.resp.BadRequestError(w, r, err)
+		return
+	}
+
+	if err := response.Validate.Struct(fq); err != nil {
+		h.resp.BadRequestError(w, r, err)
+		return
+	}
+
+	workouts, err := h.store.Workouts.GetUsersWorkouts(r.Context(), fq, userID)
+	if err != nil {
+		h.resp.InternalServerError(w, r, err)
+		return
+	}
+
+	if err := response.WriteJSON(w, http.StatusOK, workouts); err != nil {
+		h.resp.InternalServerError(w, r, err)
+		return
+	}
+}
+
+//	@GetWorkout		godoc
+//	@Summary		Get workout by ID
+//	@Description	Get workout by ID
+//	@Tags			workouts
+//	@Accept			json
+//	@Produce		json
+//	@Param			workoutID	path		int	true	"Workout ID"
+//	@Success		200			{object}	store.Workout
+//	@Router			/workouts/{workoutID} [get]
 func (h *Handlers) GetWorkoutHandler(w http.ResponseWriter, r *http.Request) {
 	workoutID := chi.URLParam(r, "workoutID")
 	if workoutID == "" {

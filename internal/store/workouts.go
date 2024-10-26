@@ -115,6 +115,77 @@ func (s *WorkoutStore) GetAll(
 	return workouts, totalCount, nil
 }
 
+func (s *WorkoutStore) GetUsersWorkouts(
+	ctx context.Context,
+	fq pagination.PaginatedQuery,
+	userID int64,
+) ([]Workout, error) {
+	query := `
+		SELECT 
+	  w.id, 
+	  w.user_id, 
+	  w.name, 
+	  w.description, 
+	  w.tutorial_link, 
+	  w.created_at, 
+	  COUNT(DISTINCT wl.user_id) AS likes, 
+	  COUNT(DISTINCT wr.user_id) AS reviews_count, 
+	  COALESCE(AVG(wr.rating), 0.0) AS average_rating,
+	  CASE 
+	    WHEN EXISTS (
+	      SELECT 1 FROM workout_likes wl2 
+	      WHERE wl2.workout_id = w.id AND wl2.user_id = $1
+	    ) THEN true
+	    ELSE false 
+	  END AS user_liked 
+	FROM workouts w 
+	LEFT JOIN workout_exercises we ON we.workout_id = w.id 
+	LEFT JOIN exercises e ON we.exercise_id = e.id 
+	LEFT JOIN workout_likes wl ON w.id = wl.workout_id 
+	LEFT JOIN workout_reviews wr ON w.id = wr.workout_id 
+	WHERE 
+	 w.user_id = $1 
+	GROUP BY w.id 
+	ORDER BY likes ` + fq.Sort + ` 
+	LIMIT $2 OFFSET $3
+
+	`
+	workouts := make([]Workout, 0)
+
+	rows, err := s.db.QueryContext(
+		ctx,
+		query,
+		userID,
+		fq.Limit,
+		fq.Offset,
+	)
+	if err != nil {
+		return nil, err
+	}
+	for rows.Next() {
+		var w Workout
+
+		err := rows.Scan(
+			&w.ID,
+			&w.UserID,
+			&w.Name,
+			&w.Description,
+			&w.TutorialLink,
+			&w.CreatedAt,
+			&w.Likes,
+			&w.ReviewsCount,
+			&w.Rating,
+			&w.UserLiked,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		workouts = append(workouts, w)
+	}
+	return workouts, nil
+}
+
 func (s *WorkoutStore) Create(ctx context.Context, w *Workout) error {
 	return withTx(s.db, ctx, func(tx *sql.Tx) error {
 		if err := s.createWorkout(ctx, tx, w); err != nil {

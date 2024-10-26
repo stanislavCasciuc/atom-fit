@@ -713,6 +713,42 @@ paths:
       summary: Get all workouts
       tags:
       - workouts
+  /workouts/{userID}:
+    get:
+      consumes:
+      - application/json
+      description: Get user workouts
+      parameters:
+      - description: Limit
+        in: query
+        name: limit
+        type: integer
+      - description: Offset
+        in: query
+        name: offset
+        type: integer
+      - description: Sort
+        in: query
+        name: sort
+        type: string
+      - description: userID
+        in: path
+        name: userID
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/store.Workout'
+            type: array
+      security:
+      - ApiKeyAuth: []
+      summary: Get user workouts
+      tags:
+      - workouts
   /workouts/{workoutID}:
     get:
       consumes:
