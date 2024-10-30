@@ -130,3 +130,50 @@ func (h *Handlers) GetExerciseHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 }
+
+//	@GetUsersExercises	godoc
+//	@Summary			Get all Exercises by user id
+//	@Description		Get all Exercises by user id
+//	@Tags				exercises
+//	@Accept				json
+//	@Produce			json
+//	@Param				userID	path		int	true	"User ID"
+//	@Param				limit	query		int	false	"Limit"
+//	@Param				offset	query		int	false	"Offset"
+//	@Success			200		{object}	[]store.Exercise
+//	@Router				/exercises/{userID} [get]
+func (h *Handlers) GetUsersExercises(w http.ResponseWriter, r *http.Request) {
+	idString := chi.URLParam(r, "userID")
+	userID, err := strconv.ParseInt(idString, 10, 64)
+	if err != nil {
+		h.resp.InternalServerError(w, r, err)
+		return
+	}
+
+	fq := pagination.PaginatedQuery{
+		Limit:  20,
+		Offset: 0,
+		Sort:   "desc",
+	}
+
+	fq, err = fq.Parse(r)
+	if err != nil {
+		h.resp.BadRequestError(w, r, err)
+		return
+	}
+
+	if err := response.Validate.Struct(fq); err != nil {
+		h.resp.BadRequestError(w, r, err)
+		return
+	}
+	e, err := h.store.Exercises.GetUsersExercises(r.Context(), fq, userID)
+	if err != nil {
+		h.resp.InternalServerError(w, r, err)
+		return
+	}
+
+	if err := response.WriteJSON(w, http.StatusOK, e); err != nil {
+		h.resp.InternalServerError(w, r, err)
+		return
+	}
+}

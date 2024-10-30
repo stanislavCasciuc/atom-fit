@@ -110,3 +110,51 @@ func (s *ExerciseStore) GetByID(ctx context.Context, id int64) (*Exercise, error
 
 	return e, nil
 }
+
+func (s *ExerciseStore) GetUsersExercises(
+	ctx context.Context,
+	fq pagination.PaginatedQuery,
+	userID int64,
+) ([]Exercise, error) {
+	query := `
+		SELECT id, exercises.user_id, name, description, is_duration, duration, tutorial_link, created_at, muscles, COUNT(DISTINCT el.user_id) as likes
+    FROM exercises 
+		LEFT JOIN exercise_likes el ON exercises.id = el.exercise_id
+    WHERE exercises.user_id = $1
+		GROUP BY id
+    ORDER BY likes ` + fq.Sort + `
+    LIMIT $2 OFFSET $3
+	`
+
+	rows, err := s.db.QueryContext(ctx, query, userID, fq.Limit, fq.Offset)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, ErrNotFound
+		}
+		return nil, err
+	}
+
+	var exercises []Exercise
+
+	for rows.Next() {
+		var e Exercise
+		log.Println(rows)
+		err := rows.Scan(
+			&e.ID,
+			&e.UserID,
+			&e.Name,
+			&e.Description,
+			&e.IsDuration,
+			&e.Duration,
+			&e.TutorialLink,
+			&e.CreatedAt,
+			pq.Array(&e.Muscles),
+			&e.Likes,
+		)
+		if err != nil {
+			return nil, err
+		}
+		exercises = append(exercises, e)
+	}
+	return exercises, nil
+}

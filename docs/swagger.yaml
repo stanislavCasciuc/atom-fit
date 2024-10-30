@@ -475,6 +475,37 @@ paths:
       summary: Get Exercise by id from param
       tags:
       - exercises
+  /exercises/{userID}:
+    get:
+      consumes:
+      - application/json
+      description: Get all Exercises by user id
+      parameters:
+      - description: User ID
+        in: path
+        name: userID
+        required: true
+        type: integer
+      - description: Limit
+        in: query
+        name: limit
+        type: integer
+      - description: Offset
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/store.Exercise'
+            type: array
+      summary: Get all Exercises by user id
+      tags:
+      - exercises
   /nutrients/daily-goal:
     get:
       consumes:
