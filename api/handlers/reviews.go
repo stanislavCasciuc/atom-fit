@@ -16,18 +16,18 @@ type WorkoutReviewPayload struct {
 	Content string `json:"content" validate:"required"`
 }
 
-// @ReviewWorkout	godoc
-// @Summary		Review workout
-// @Description	Review workout
-// @Tags			reviews
-// @Accept			json
-// @Produce		json
-// @Param			workoutID	path		int						true	"Workout ID"
-// @Param			payload		body		WorkoutReviewPayload	true	"Review workout payload"
-// @Success		200			{object}	store.WorkoutReview
-// @Failure		400			{object}	error
-// @Security		ApiKeyAuth
-// @Router			/reviews/workout/{workoutID} [post]
+//	@ReviewWorkout	godoc
+//	@Summary		Review workout
+//	@Description	Review workout
+//	@Tags			reviews
+//	@Accept			json
+//	@Produce		json
+//	@Param			workoutID	path		int						true	"Workout ID"
+//	@Param			payload		body		WorkoutReviewPayload	true	"Review workout payload"
+//	@Success		200			{object}	store.WorkoutReview
+//	@Failure		400			{object}	error
+//	@Security		ApiKeyAuth
+//	@Router			/reviews/workout/{workoutID} [post]
 func (h *Handlers) ReviewWorkoutHandler(w http.ResponseWriter, r *http.Request) {
 	u := h.GetUserFromCtx(r)
 	idString := chi.URLParam(r, "workoutID")
@@ -61,16 +61,16 @@ func (h *Handlers) ReviewWorkoutHandler(w http.ResponseWriter, r *http.Request) 
 	}
 }
 
-// @GetWorkoutReviews	godoc
-// @Summary			Get workout reviews
-// @Description		Get workout reviews
-// @Tags				reviews
-// @Accept				json
-// @Produce			json
-// @Param				workoutID	path		int	true	"Workout ID"
-// @Success			200			{object}	[]store.WorkoutReviewWithMetadata
-// @Failure			400			{object}	error
-// @Router				/reviews/workout/{workoutID} [get]
+//	@GetWorkoutReviews	godoc
+//	@Summary			Get workout reviews
+//	@Description		Get workout reviews
+//	@Tags				reviews
+//	@Accept				json
+//	@Produce			json
+//	@Param				workoutID	path		int	true	"Workout ID"
+//	@Success			200			{object}	[]store.WorkoutReviewWithMetadata
+//	@Failure			400			{object}	error
+//	@Router				/reviews/workout/{workoutID} [get]
 func (h *Handlers) GetWorkoutReviewsHandler(w http.ResponseWriter, r *http.Request) {
 	idString := chi.URLParam(r, "workoutID")
 	workoutID, err := strconv.ParseInt(idString, 10, 64)
@@ -89,4 +89,34 @@ func (h *Handlers) GetWorkoutReviewsHandler(w http.ResponseWriter, r *http.Reque
 		h.resp.InternalServerError(w, r, err)
 		return
 	}
+}
+
+//	@PatchWorkoutReview	godoc
+//	@Summary			Update workout review
+//	@Description		Update workout review
+//	@Tags				reviews
+//	@Accept				json
+//	@Produce			json
+//	@Param				workoutID	path		int						true	"Workout ID"
+//	@Param				reviewID	path		int						true	"Review ID"
+//	@Param				payload		body		WorkoutReviewPayload	true	"Review workout payload"
+//	@Success			200			{object}	store.WorkoutReview
+//	@Failure			400			{object}	error
+//	@Security			ApiKeyAuth
+//	@Router				/reviews/workout/{workoutID}/{reviewID} [patch]
+func (h *Handlers) PatchWorkoutReviewHandler(w http.ResponseWriter, r *http.Request) {
+}
+
+//	@DeleteWorkoutReview	godoc
+//	@Summary				Delete workout review
+//	@Description			Delete workout review
+//	@Tags					reviews
+//	@Accept					json
+//	@Produce				json
+//	@Param					workoutID	path		int	true	"Workout ID"
+//	@Param					reviewID	path		int	true	"Review ID"
+//	@Success				204			{object}	store.WorkoutReview
+//	@Security				ApiKeyAuth
+//	@Router					/reviews/workout/{workoutID}/{reviewID} [delete]
+func (h *Handlers) DeleteWorkoutReviewHandler(w http.ResponseWriter, r *http.Request) {
 }

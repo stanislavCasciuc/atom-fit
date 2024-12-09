@@ -31,6 +31,13 @@ definitions:
     - exercises
     - name
     type: object
+  handlers.EndWorkoutPayload:
+    properties:
+      duration:
+        type: string
+      workout_id:
+        type: integer
+    type: object
   handlers.LogWeightPayload:
     properties:
       weight:
@@ -475,6 +482,57 @@ paths:
       summary: Get Exercise by id from param
       tags:
       - exercises
+  /exercises/{idString}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete Exercise by idString
+      parameters:
+      - description: Exercise ID
+        in: path
+        name: idString
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+          schema:
+            $ref: '#/definitions/store.Exercise'
+      security:
+      - ApiKeyAuth: []
+      summary: Delete Exercise by idString
+      tags:
+      - exercises
+    patch:
+      consumes:
+      - application/json
+      description: Update Exercise by idString
+      parameters:
+      - description: Exercise ID
+        in: path
+        name: idString
+        required: true
+        type: integer
+      - description: Exercise Payload
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/store.Exercise'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/store.Exercise'
+      security:
+      - ApiKeyAuth: []
+      summary: Update Exercise by idString
+      tags:
+      - exercises
   /exercises/{userID}:
     get:
       consumes:
@@ -578,6 +636,70 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Review workout
+      tags:
+      - reviews
+  /reviews/workout/{workoutID}/{reviewID}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete workout review
+      parameters:
+      - description: Workout ID
+        in: path
+        name: workoutID
+        required: true
+        type: integer
+      - description: Review ID
+        in: path
+        name: reviewID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+          schema:
+            $ref: '#/definitions/store.WorkoutReview'
+      security:
+      - ApiKeyAuth: []
+      summary: Delete workout review
+      tags:
+      - reviews
+    patch:
+      consumes:
+      - application/json
+      description: Update workout review
+      parameters:
+      - description: Workout ID
+        in: path
+        name: workoutID
+        required: true
+        type: integer
+      - description: Review ID
+        in: path
+        name: reviewID
+        required: true
+        type: integer
+      - description: Review workout payload
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.WorkoutReviewPayload'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/store.WorkoutReview'
+        "400":
+          description: Bad Request
+          schema: {}
+      security:
+      - ApiKeyAuth: []
+      summary: Update workout review
       tags:
       - reviews
   /users:
@@ -744,43 +866,27 @@ paths:
       summary: Get all workouts
       tags:
       - workouts
-  /workouts/{userID}:
-    get:
+  /workouts/{workoutID}:
+    delete:
       consumes:
       - application/json
-      description: Get user workouts
+      description: Delete workout by ID
       parameters:
-      - description: Limit
-        in: query
-        name: limit
-        type: integer
-      - description: Offset
-        in: query
-        name: offset
-        type: integer
-      - description: Sort
-        in: query
-        name: sort
-        type: string
-      - description: userID
+      - description: Workout ID
         in: path
-        name: userID
+        name: workoutID
+        required: true
         type: integer
       produces:
       - application/json
       responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/store.Workout'
-            type: array
+        "204":
+          description: No Content
       security:
       - ApiKeyAuth: []
-      summary: Get user workouts
+      summary: Delete workout by ID
       tags:
       - workouts
-  /workouts/{workoutID}:
     get:
       consumes:
       - application/json
@@ -799,6 +905,26 @@ paths:
           schema:
             $ref: '#/definitions/store.Workout'
       summary: Get workout by ID
+      tags:
+      - workouts
+    patch:
+      consumes:
+      - application/json
+      description: Update workout by ID
+      parameters:
+      - description: Workout ID
+        in: path
+        name: workoutID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+      security:
+      - ApiKeyAuth: []
+      summary: Update workout by ID
       tags:
       - workouts
   /workouts/{workoutID}/like:
@@ -858,6 +984,74 @@ paths:
       summary: Like exercise
       tags:
       - likes
+  /workouts/end:
+    post:
+      consumes:
+      - application/json
+      description: End workout
+      parameters:
+      - description: End workout payload
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.EndWorkoutPayload'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ok
+          schema:
+            type: string
+        "400":
+          description: bad request
+          schema:
+            type: string
+        "500":
+          description: internal server error
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: End workout
+      tags:
+      - finished_workouts
+  /workouts/user/{userID}:
+    get:
+      consumes:
+      - application/json
+      description: Get user workouts
+      parameters:
+      - description: Limit
+        in: query
+        name: limit
+        type: integer
+      - description: Offset
+        in: query
+        name: offset
+        type: integer
+      - description: Sort
+        in: query
+        name: sort
+        type: string
+      - description: userID
+        in: path
+        name: userID
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/store.Workout'
+            type: array
+      security:
+      - ApiKeyAuth: []
+      summary: Get user workouts
+      tags:
+      - workouts
 securityDefinitions:
   ApiKeyAuth:
     in: header

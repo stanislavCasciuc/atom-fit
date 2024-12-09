@@ -49,15 +49,20 @@ type Storage struct {
 		CreateWorkout(context.Context, *WorkoutReview) error
 		Get(context.Context, int64) ([]WorkoutReviewWithMetadata, error)
 	}
+	FinishedWorkouts interface {
+		Create(context.Context, *FinishedWorkout) error
+		GetAll(context.Context, int64) ([]FinishedWorkout, error)
+	}
 }
 
 func New(db *sql.DB) Storage {
 	return Storage{
-		Users:     &UserStore{db},
-		Exercises: &ExerciseStore{db},
-		Likes:     &LikesStore{db},
-		Workouts:  &WorkoutStore{db},
-		Reviews:   &ReviewsStore{db},
+		Users:            &UserStore{db},
+		Exercises:        &ExerciseStore{db},
+		Likes:            &LikesStore{db},
+		Workouts:         &WorkoutStore{db},
+		Reviews:          &ReviewsStore{db},
+		FinishedWorkouts: &FinishedWorkoutsStore{db},
 	}
 }
 

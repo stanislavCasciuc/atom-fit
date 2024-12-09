@@ -136,7 +136,7 @@ func (h *Handlers) GetAllWorkouts(w http.ResponseWriter, r *http.Request) {
 //	@Param				userID	path		int		false	"userID"
 //	@Success			200		{object}	[]store.Workout
 //	@Security			ApiKeyAuth
-//	@Router				/workouts/{userID} [get]
+//	@Router				/workouts/user/{userID} [get]
 func (h *Handlers) GetUserWorkouts(w http.ResponseWriter, r *http.Request) {
 	idString := chi.URLParam(r, "userID")
 	userID, err := strconv.ParseInt(idString, 10, 64)
@@ -217,4 +217,30 @@ func (h *Handlers) GetWorkoutHandler(w http.ResponseWriter, r *http.Request) {
 		h.resp.InternalServerError(w, r, err)
 		return
 	}
+}
+
+//	@DeleteWorkout	godoc
+//	@Summary		Delete workout by ID
+//	@Description	Delete workout by ID
+//	@Tags			workouts
+//	@Accept			json
+//	@Produce		json
+//	@Param			workoutID	path	int	true	"Workout ID"
+//	@Success		204			"No Content"
+//	@Security		ApiKeyAuth
+//	@Router			/workouts/{workoutID} [delete]
+func (h *Handlers) DeleteWorkoutHandler(w http.ResponseWriter, r *http.Request) {
+}
+
+//	@PatchWorkout	godoc
+//	@Summary		Update workout by ID
+//	@Description	Update workout by ID
+//	@Tags			workouts
+//	@Accept			json
+//	@Produce		json
+//	@Param			workoutID	path	int	true	"Workout ID"
+//	@Success		204			"No Content"
+//	@Security		ApiKeyAuth
+//	@Router			/workouts/{workoutID} [patch]
+func (h *Handlers) PatchWorkoutHandler(w http.ResponseWriter, r *http.Request) {
 }

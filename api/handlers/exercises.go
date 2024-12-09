@@ -177,3 +177,30 @@ func (h *Handlers) GetUsersExercises(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 }
+
+//	@UpdateExerciseHandler	godoc
+//	@Summary				Update Exercise by idString
+//	@Description			Update Exercise by idString
+//	@Tags					exercises
+//	@Accept					json
+//	@Produce				json
+//	@Param					idString	path		int				true	"Exercise ID"
+//	@Param					payload		body		store.Exercise	true	"Exercise Payload"
+//	@Success				200			{object}	store.Exercise
+//	@Security				ApiKeyAuth
+//	@Router					/exercises/{idString} [patch]
+func (h *Handlers) UpdateExerciseHandler(w http.ResponseWriter, r *http.Request) {
+}
+
+//	@DeleteExerciseHandler	godoc
+//	@Summary				Delete Exercise by idString
+//	@Description			Delete Exercise by idString
+//	@Tags					exercises
+//	@Accept					json
+//	@Produce				json
+//	@Param					idString	path		int	true	"Exercise ID"
+//	@Success				204			{object}	store.Exercise
+//	@Security				ApiKeyAuth
+//	@Router					/exercises/{idString} [delete]
+func (h *Handlers) DeleteExerciseHandler(w http.ResponseWriter, r *http.Request) {
+}
